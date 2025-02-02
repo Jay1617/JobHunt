@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import validator from "validator";
+import crypto from "crypto";
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -31,7 +32,7 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
-    minLength: [8, "Password must cantain at least 8 chatacters."],
+    minLength: [8, "Password must contain at least 8 characters."],
     maxLength: [32, "Password cannot exceed 32 characters."],
     select: false,
   },
@@ -72,15 +73,9 @@ userSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-userSchema.methods.getJWTToken = function () {
-  return jwt.sign({ id: this._id }, process.env.JWT_SECRET_KEY, {
-    expiresIn: process.env.JWT_EXPIRE,
-  });
-};
-
 userSchema.methods.generateToken = async function () {
   return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_TIME,
+    expiresIn: process.env.JWT_EXPIRES,
   });
 };
 
