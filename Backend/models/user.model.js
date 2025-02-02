@@ -73,8 +73,15 @@ userSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
+userSchema.methods.getVerificationCode = async function () {
+  const verificationCode = Math.floor(100000 + Math.random() * 900000);
+  this.verificationCode = verificationCode;
+  this.verificationCodeExpires = Date.now() + 10 * 60 * 1000;
+  return verificationCode;
+};
+
 userSchema.methods.generateToken = async function () {
-  return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
+  return jwt.sign({ id: this._id }, process.env.JWT_SECRET_KEY, {
     expiresIn: process.env.JWT_EXPIRES,
   });
 };

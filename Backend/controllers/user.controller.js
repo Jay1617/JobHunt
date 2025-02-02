@@ -180,3 +180,114 @@ const generateEmailTemplate = (verificationCode) => {
       </div>
     `;
 };
+
+export const verifyAccount = catchAsyncErrors(async (req, res, next) => {
+  const { email, verificationCode } = req.body;
+
+  try {
+    const userAllEntries = await User.find({
+      email,
+      accountVerified: false,
+    }).sort({ createdAt: -1 });
+
+    if (!userAllEntries || userAllEntries.length === 0) {
+      return next(new ErrorHandler("User not found.", 404));
+    }
+
+    // console.log("User Entries:", userAllEntries);
+
+    let user = userAllEntries[0];
+    if (userAllEntries.length > 1) {
+      await User.deleteMany({
+        _id: { $ne: user._id },
+        email,
+        accountVerified: false,
+      });
+      console.log("Older unverified users deleted.");
+    }
+
+    // console.log("User to verify:", user);
+
+    if (
+      !user.verificationCode ||
+      user.verificationCode !== Number(verificationCode)
+    ) {
+      return next(new ErrorHandler("Invalid Verification Code.", 400));
+    }
+
+    console.log("Verification Code Matched!");
+
+    if (!user.verificationCodeExpires) {
+      return next(new ErrorHandler("Verification Code Expired.", 400));
+    }
+
+    const currentTime = Date.now();
+    const verificationCodeExpire = new Date(
+      user.verificationCodeExpires
+    ).getTime();
+
+    if (currentTime > verificationCodeExpire) {
+      return next(new ErrorHandler("Verification Code Expired.", 400));
+    }
+
+    // console.log("Verification Code is valid, updating user status...");
+
+    user.accountVerified = true;
+    user.verificationCode = null;
+    user.verificationCodeExpires = null;
+    await user.save({ validateModifiedOnly: true });
+
+    // console.log("User verified successfully!");
+    sendToken(user, 200, "Account Verified.", res);
+  } catch (error) {
+    console.error("Error in verifyAccount:", error);
+    return next(new ErrorHandler("Internal Server Error.", 500));
+  }
+});
+
+//login
+export const login = catchAsyncErrors(async (req, res, next) => {
+  const { email, password } = req.body;
+
+//   console.log("Login Request:", req.body);
+  
+  if (!email || !password) {
+    return next(new ErrorHandler("Email and password are required.", 400));
+  }
+  const user = await User.findOne({ email, accountVerified: true }).select(
+    "+password"
+  );
+//   console.log(user);
+  
+  if (!user) {
+    return next(new ErrorHandler("Invalid email or password.", 400));
+  }
+  const isPasswordMatched = await user.comparePassword(password);
+  if (!isPasswordMatched) {
+    return next(new ErrorHandler("Invalid email or password.", 400));
+  }
+  sendToken(user, 200, "User logged in successfully.", res);
+});
+
+//logout
+export const logout = catchAsyncErrors(async (req, res, next) => {
+  res
+    .status(200)
+    .cookie("token", null, {
+      expires: new Date(Date.now()),
+      httpOnly: true,
+    })
+    .json({
+      success: true,
+      message: "Logged out successfully.",
+    });
+});
+
+export const getUserProfile = catchAsyncErrors(async (req, res, next) => {
+    const user = req.user;
+  
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  });
