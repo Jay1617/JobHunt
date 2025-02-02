@@ -249,16 +249,16 @@ export const verifyAccount = catchAsyncErrors(async (req, res, next) => {
 export const login = catchAsyncErrors(async (req, res, next) => {
   const { email, password } = req.body;
 
-//   console.log("Login Request:", req.body);
-  
+  //   console.log("Login Request:", req.body);
+
   if (!email || !password) {
     return next(new ErrorHandler("Email and password are required.", 400));
   }
   const user = await User.findOne({ email, accountVerified: true }).select(
     "+password"
   );
-//   console.log(user);
-  
+  //   console.log(user);
+
   if (!user) {
     return next(new ErrorHandler("Invalid email or password.", 400));
   }
@@ -284,10 +284,91 @@ export const logout = catchAsyncErrors(async (req, res, next) => {
 });
 
 export const getUserProfile = catchAsyncErrors(async (req, res, next) => {
-    const user = req.user;
-  
+  const user = req.user;
+
+  res.status(200).json({
+    success: true,
+    user,
+  });
+});
+
+export const forgotPassword = catchAsyncErrors(async (req, res, next) => {
+  const user = await User.findOne({
+    email: req.body.email,
+    accountVerified: true,
+  });
+
+  if (!user) {
+    return next(new ErrorHandler("User not found with this email", 404));
+  }
+
+  const resetToken = await user.getResetPasswordToken();
+
+  await user.save({ validateBeforeSave: false });
+
+  const resetUrl = `${process.env.FRONTEND_URL}/password/reset/${resetToken}`;
+
+  const message = `
+      <h1>Password Reset Request</h1>
+      <p>Please go to this link to reset your password:</p>
+      <a href=${resetUrl} clicktracking=off>${resetUrl}</a>
+    `;
+
+  try {
+    await sendEmail(user.email, "Password Reset Request", message);
+
     res.status(200).json({
       success: true,
-      user,
+      message: `Email sent to: ${user.email}`,
     });
-  });
+  } catch (error) {
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+
+    await user.save({ validateBeforeSave: false });
+
+    return next(new ErrorHandler("Email could not be sent", 500));
+  }
+});
+
+export const resetPassword = catchAsyncErrors(async (req, res, next) => {
+  const { token } = req.params;
+  const resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+
+  const user = await User.findOne({
+    resetPasswordToken,
+    resetPasswordExpires: { $gt: Date.now() },
+  }).select("+password");
+
+  if (!user) {
+    return next(new ErrorHandler("Invalid reset token", 400));
+  }
+
+  const { password, confirmPassword } = req.body;
+
+  if (password !== confirmPassword) {
+    return next(new ErrorHandler("Passwords do not match", 400));
+  }
+
+  if (password.length > 32) {
+    return next(
+      new ErrorHandler("Password must be at most 32 characters long", 400)
+    );
+  }
+
+  const isSamePassword = await bcrypt.compare(password, user.password);
+  if (isSamePassword) {
+    return next(new ErrorHandler("Please enter a new password", 400));
+  }
+
+  user.password = password;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpires = undefined;
+
+  await user.save();
+
+  sendToken(user, 200, "Password Reset Successfully", res);
+});
