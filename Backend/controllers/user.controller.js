@@ -372,3 +372,77 @@ export const resetPassword = catchAsyncErrors(async (req, res, next) => {
 
   sendToken(user, 200, "Password Reset Successfully", res);
 });
+
+export const updatePassword = catchAsyncErrors(async (req, res, next) => {
+  const user = await User.findById(req.user.id).select("+password");
+
+  const isPasswordMatched = await user.comparePassword(req.body.oldPassword);
+
+  if (!isPasswordMatched) {
+    return next(new ErrorHandler("Old password is incorrect.", 400));
+  }
+
+  if (req.body.newPassword !== req.body.confirmPassword) {
+    return next(
+      new ErrorHandler("New password & confirm password do not match.", 400)
+    );
+  }
+
+  user.password = req.body.newPassword;
+  await user.save();
+  console.log("Password updates successfully.");
+  
+  sendToken(user, 200, "Password updated successfully.", res);
+});
+
+export const updateProfile = catchAsyncErrors(async (req, res, next) => {
+  const newUserData = {
+    name: req.body.name,
+    email: req.body.email,
+    phone: req.body.phone,
+    address: req.body.address,
+    coverLetter: req.body.coverLetter,
+    niches: {
+      firstNiche: req.body.firstNiche,
+      secondNiche: req.body.secondNiche,
+      thirdNiche: req.body.thirdNiche,
+    },
+  };
+  const { firstNiche, secondNiche, thirdNiche } = newUserData.niches;
+
+  if (
+    req.user.role === "Job Seeker" &&
+    (!firstNiche || !secondNiche || !thirdNiche)
+  ) {
+    return next(
+      new ErrorHandler("Please provide your all preferred job niches.", 400)
+    );
+  }
+  if (req.files) {
+    const resume = req.files.resume;
+    if (resume) {
+      const currentResumeId = req.user.resume.public_id;
+      if (currentResumeId) {
+        await cloudinary.uploader.destroy(currentResumeId);
+      }
+      const newResume = await cloudinary.uploader.upload(resume.tempFilePath, {
+        folder: "Job_Seekers_Resume",
+      });
+      newUserData.resume = {
+        public_id: newResume.public_id,
+        url: newResume.secure_url,
+      };
+    }
+  }
+
+  const user = await User.findByIdAndUpdate(req.user.id, newUserData, {
+    new: true,
+    runValidators: true,
+    useFindAndModify: false,
+  });
+  res.status(200).json({
+    success: true,
+    user,
+    message: "Profile updated.",
+  });
+});
