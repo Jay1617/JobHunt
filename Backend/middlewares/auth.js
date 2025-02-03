@@ -8,8 +8,6 @@ export const isAuthenticated = catchAsyncErrors(async (req, res, next) => {
     const { token } = req.cookies;
 
     // console.log(req.cookies);
-    
-
     if (!token) {
       return next(new ErrorHandler("User is not Authenticated", 401));
     }
@@ -24,3 +22,16 @@ export const isAuthenticated = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("Error in Authentication", 401));
   }
 });
+
+export const isAuthorized = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new ErrorHandler(
+          `${req.user.role} not allowed to access this resource.`
+        )
+      );
+    }
+    next();
+  };
+};
