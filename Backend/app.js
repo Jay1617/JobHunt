@@ -6,6 +6,7 @@ import cors from "cors";
 import fileUpload from "express-fileupload";
 import { errorMiddleware } from "./middlewares/error.js";
 import userRoutes from "./routes/user.routes.js";
+import jobRoutes from "./routes/job.routes.js"
 import { removeUnverifiedUser } from "./automation/removeUnverifiedUser.js";
 
 const app = express();
@@ -31,6 +32,7 @@ app.use(
 );
 
 app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/job", jobRoutes);
 
 removeUnverifiedUser();
 dbConnection();

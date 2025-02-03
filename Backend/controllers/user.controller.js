@@ -144,7 +144,7 @@ async function sendVerificationCode(verificationCode, email, res) {
   try {
     const message = generateEmailTemplate(verificationCode);
 
-    await sendEmail(email, "Account Verification Code", message);
+    await sendEmail(email, "Account Verification Code - JobHunt", message);
 
     res.status(201).json({
       success: true,
@@ -315,7 +315,7 @@ export const forgotPassword = catchAsyncErrors(async (req, res, next) => {
     `;
 
   try {
-    await sendEmail(user.email, "Password Reset Request", message);
+    await sendEmail(user.email, "Password Reset Request - JobHunt", message);
 
     res.status(200).json({
       success: true,
@@ -446,3 +446,79 @@ export const updateProfile = catchAsyncErrors(async (req, res, next) => {
     message: "Profile updated.",
   });
 });
+
+
+//updated controller to verify email 
+// export const updateProfile = catchAsyncErrors(async (req, res, next) => {
+//   const newUserData = {
+//     name: req.body.name,
+//     phone: req.body.phone,
+//     address: req.body.address,
+//     coverLetter: req.body.coverLetter,
+//     niches: {
+//       firstNiche: req.body.firstNiche,
+//       secondNiche: req.body.secondNiche,
+//       thirdNiche: req.body.thirdNiche,
+//     },
+//   };
+
+//   const { firstNiche, secondNiche, thirdNiche } = newUserData.niches;
+  
+//   if (
+//     req.user.role === "Job Seeker" &&
+//     (!firstNiche || !secondNiche || !thirdNiche)
+//   ) {
+//     return next(
+//       new ErrorHandler("Please provide all your preferred job niches.", 400)
+//     );
+//   }
+
+//   // Handle email update: Require re-verification
+//   if (req.body.email && req.body.email !== req.user.email) {
+//     newUserData.email = req.body.email;
+//     newUserData.accountVerified = false; // Mark unverified
+
+//     // Generate a new verification code
+//     const verificationCode = crypto.randomInt(100000, 999999);
+//     newUserData.verificationCode = verificationCode;
+//     newUserData.verificationCodeExpires = Date.now() + 10 * 60 * 1000; // 10 minutes expiration
+
+//     // Send verification email
+//     await sendEmail({
+//       email: req.body.email,
+//       subject: "Verify Your Email - JobHunt",
+//       message: `Your verification code is: ${verificationCode}. It will expire in 10 minutes.`,
+//     });
+//   }
+
+//   // Handle resume upload
+//   if (req.files) {
+//     const resume = req.files.resume;
+//     if (resume) {
+//       const currentResumeId = req.user.resume?.public_id;
+//       if (currentResumeId) {
+//         await cloudinary.uploader.destroy(currentResumeId);
+//       }
+//       const newResume = await cloudinary.uploader.upload(resume.tempFilePath, {
+//         folder: "Job_Seekers_Resume",
+//       });
+//       newUserData.resume = {
+//         public_id: newResume.public_id,
+//         url: newResume.secure_url,
+//       };
+//     }
+//   }
+
+//   // Update user profile
+//   const user = await User.findByIdAndUpdate(req.user.id, newUserData, {
+//     new: true,
+//     runValidators: true,
+//     useFindAndModify: false,
+//   });
+
+//   res.status(200).json({
+//     success: true,
+//     user,
+//     message: req.body.email ? "Profile updated. Please verify your new email." : "Profile updated.",
+//   });
+// });
