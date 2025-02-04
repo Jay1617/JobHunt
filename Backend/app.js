@@ -9,6 +9,7 @@ import userRoutes from "./routes/user.routes.js";
 import jobRoutes from "./routes/job.routes.js"
 import applicationRoutes from "./routes/application.routes.js"
 import { removeUnverifiedUser } from "./automation/removeUnverifiedUser.js";
+import { newsLetterCron } from "./automation/newsLetterCron.js";
 
 const app = express();
 dotenv.config({ path: "./config/.env" });
@@ -37,6 +38,7 @@ app.use("/api/v1/job", jobRoutes);
 app.use("/api/v1/application", applicationRoutes);
 
 removeUnverifiedUser();
+newsLetterCron();
 dbConnection();
 app.use(errorMiddleware);
 
