@@ -7,6 +7,7 @@ import fileUpload from "express-fileupload";
 import { errorMiddleware } from "./middlewares/error.js";
 import userRoutes from "./routes/user.routes.js";
 import jobRoutes from "./routes/job.routes.js"
+import applicationRoutes from "./routes/application.routes.js"
 import { removeUnverifiedUser } from "./automation/removeUnverifiedUser.js";
 
 const app = express();
