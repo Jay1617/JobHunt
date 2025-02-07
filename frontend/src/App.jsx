@@ -1,33 +1,56 @@
-import { useState } from 'react'
-import './App.css'
+import React, { useEffect } from "react";
+import "./App.css";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+import Home from "./pages/Home";
+import Dashboard from "./pages/Dashboard";
+import Jobs from "./pages/Jobs";
+import Login from "./pages/Login";
+import NotFound from "./pages/NotFound";
+import PostApplication from "./pages/PostApplication";
+import Register from "./pages/Register";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useDispatch } from "react-redux";
+import { getUser } from "./store/slices/userSlice";
+import OtpVerification from "./pages/OtpVerification";
+import ForgotPassword from "./pages/ForgotPassword";
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getUser());
+  }, []);
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.de v" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <Router>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/jobs" element={<Jobs />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route
+            path="/post/application/:jobId"
+            element={<PostApplication />}
+          />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route
+            path="/otp-verification/:email"
+            element={<OtpVerification />}
+          />
+          <Route path="/password/forgot" element={<ForgotPassword />} />
+          <Route path="/password/reset/:token" element={<ForgotPassword />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        <Footer />
+        <ToastContainer position="top-right" theme="dark" />
+      </Router>
     </>
-  )
-}
+  );
+};
 
-export default App
+export default App;
