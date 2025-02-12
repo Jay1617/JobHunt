@@ -56,7 +56,7 @@ export const register = catchAsyncErrors(async (req, res, next) => {
       ],
     });
     if (existingUser) {
-      return next(new ErrorHandler("Email is already registered.", 400));
+      return next(new ErrorHandler("Email or Phone is already registered.", 400));
     }
 
     // Check if user has exceeded the maximum number of registration attempts
