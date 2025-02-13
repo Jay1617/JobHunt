@@ -45,7 +45,7 @@ const Footer = ({ isAuthenticated = false, onNavigate }) => {
             <li>
               <button
                 onClick={() => handleNavigate("/")}
-                className="hover:text-blue-600 transition-colors"
+                className="hover:text-blue-600 transition-colors cursor-pointer"
               >
                 Home
               </button>
@@ -53,7 +53,7 @@ const Footer = ({ isAuthenticated = false, onNavigate }) => {
             <li>
               <button
                 onClick={() => handleNavigate("/jobs")}
-                className="hover:text-blue-600 transition-colors"
+                className="hover:text-blue-600 transition-colors cursor-pointer"
               >
                 Jobs
               </button>
@@ -71,7 +71,7 @@ const Footer = ({ isAuthenticated = false, onNavigate }) => {
             <li>
               <button
                 onClick={() => handleNavigate("/about-us")}
-                className="hover:text-blue-600 transition-colors"
+                className="hover:text-blue-600 transition-colors cursor-pointer"
               >
                 About Us
               </button>
@@ -79,7 +79,7 @@ const Footer = ({ isAuthenticated = false, onNavigate }) => {
             <li>
               <button
                 onClick={() => handleNavigate("/contact-us")}
-                className="hover:text-blue-600 transition-colors"
+                className="hover:text-blue-600 transition-colors cursor-pointer"
               >
                 Contact Us
               </button>
@@ -96,7 +96,7 @@ const Footer = ({ isAuthenticated = false, onNavigate }) => {
             <li>
               <button
                 onClick={() => window.open("https://twitter.com", "_blank")}
-                className="flex items-center space-x-2 hover:text-blue-600 transition-colors"
+                className="flex items-center space-x-2 hover:text-blue-600 transition-colors cursor-pointer"
               >
                 <Twitter className="w-5 h-5" />
                 <span>Twitter (X)</span>
@@ -105,7 +105,7 @@ const Footer = ({ isAuthenticated = false, onNavigate }) => {
             <li>
               <button
                 onClick={() => window.open("https://instagram.com", "_blank")}
-                className="flex items-center space-x-2 hover:text-blue-600 transition-colors"
+                className="flex items-center space-x-2 hover:text-blue-600 transition-colors cursor-pointer"
               >
                 <Instagram className="w-5 h-5" />
                 <span>Instagram</span>
@@ -114,7 +114,7 @@ const Footer = ({ isAuthenticated = false, onNavigate }) => {
             <li>
               <button
                 onClick={() => window.open("https://youtube.com", "_blank")}
-                className="flex items-center space-x-2 hover:text-blue-600 transition-colors"
+                className="flex items-center space-x-2 hover:text-blue-600 transition-colors cursor-pointer"
               >
                 <Youtube className="w-5 h-5" />
                 <span>Youtube</span>
@@ -123,7 +123,7 @@ const Footer = ({ isAuthenticated = false, onNavigate }) => {
             <li>
               <button
                 onClick={() => window.open("https://linkedin.com", "_blank")}
-                className="flex items-center space-x-2 hover:text-blue-600 transition-colors"
+                className="flex items-center space-x-2 hover:text-blue-600 transition-colors cursor-pointer"
               >
                 <Linkedin className="w-5 h-5" />
                 <span>LinkedIn</span>

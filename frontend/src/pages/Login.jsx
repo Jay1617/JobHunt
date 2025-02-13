@@ -11,8 +11,10 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const { loading, isAuthenticated, error } = useSelector((state) => state.user);
-  
+  const { loading, isAuthenticated, user, error } = useSelector(
+    (state) => state.user
+  );
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -30,10 +32,18 @@ const Login = () => {
       toast.error(error);
       dispatch(clearAllUserErrors());
     }
-    if (isAuthenticated) {
-      navigate("/jobs");
+    
+    if (isAuthenticated && user) {
+      toast.success("Login successful! 🎉");
+
+      // Redirect based on user role
+      if (user.role === "Employer") {
+        navigate("/dashboard", { replace: true });
+      } else if (user.role === "Job Seeker") {
+        navigate("/jobs", { replace: true });
+      }
     }
-  }, [dispatch, error, isAuthenticated, navigate]);
+  }, [dispatch, error, isAuthenticated, user, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100">
@@ -44,7 +54,9 @@ const Login = () => {
         className="w-full max-w-md bg-white rounded-xl shadow-2xl p-8"
       >
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-blue-600 mb-2">Welcome Back!</h2>
+          <h2 className="text-3xl font-bold text-blue-600 mb-2">
+            Welcome Back!
+          </h2>
           <p className="text-gray-600">Login to your account to continue</p>
         </div>
 
@@ -103,10 +115,7 @@ const Login = () => {
           <div className="text-center mt-4">
             <p className="text-gray-600">
               Don't have an account?{" "}
-              <Link
-                to="/register"
-                className="text-blue-600 hover:underline"
-              >
+              <Link to="/register" className="text-blue-600 hover:underline">
                 Register Now
               </Link>
             </p>

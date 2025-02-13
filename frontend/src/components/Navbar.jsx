@@ -1,32 +1,36 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from "../store/slices/userSlice";
 import { UserCircle, ChevronDown, LogOut, User, Menu, X } from 'lucide-react';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Navbar = () => {
   const [showMobile, setShowMobile] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const { isAuthenticated } = useSelector((state) => state.user);
+  const { isAuthenticated, user } = useSelector((state) => state.user);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setShowDropdown(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+  // Handle clicking outside dropdown
+  const handleClickOutside = useCallback((event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setShowDropdown(false);
+    }
   }, []);
 
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [handleClickOutside]);
+
   const handleLogout = () => {
-    // Add your logout logic here
     dispatch(logout());
     setShowDropdown(false);
+    toast.success("Logged out successfully!");
+    navigate('/');
   };
 
   const NavLink = ({ to, children }) => (
@@ -55,40 +59,52 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
+            {/* Common Links for All Users */}
             <NavLink to="/">Home</NavLink>
-            
-            {isAuthenticated ? (
+            <NavLink to="/about">About Us</NavLink>
+            <NavLink to="/contact">Contact Us</NavLink>
+
+            {/* Role-Based Links */}
+            {isAuthenticated && user?.role === "Job Seeker" && (
               <NavLink to="/jobs">Jobs</NavLink>
-            ) : (
-              <>
-                <NavLink to="/about">About Us</NavLink>
-                <NavLink to="/contact">Contact Us</NavLink>
-              </>
             )}
 
+            {/* Profile Dropdown for Authenticated Users */}
             {isAuthenticated ? (
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setShowDropdown(!showDropdown)}
-                  className="flex items-center space-x-1 text-gray-600 hover:text-blue-600 transition-colors duration-300"
+                  className="flex items-center space-x-1 text-gray-600 hover:text-blue-600 transition-colors duration-300 cursor-pointer"
                 >
                   <UserCircle className="h-6 w-6" />
                   <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${showDropdown ? 'rotate-180' : ''}`} />
                 </button>
 
                 {showDropdown && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 border border-gray-100 transform origin-top-right transition-all duration-200">
-                    <Link
-                      to="/dashboard"
-                      className="flex items-center px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200"
-                      onClick={() => setShowDropdown(false)}
-                    >
-                      <User className="h-4 w-4 mr-2" />
-                      Profile
-                    </Link>
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 border border-gray-100 transform origin-top-right transition-all duration-200 z-50">
+                    {user?.role === "Job Seeker" && (
+                      <Link
+                        to="/dashboard"
+                        className="flex items-center px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200"
+                        onClick={() => setShowDropdown(false)}
+                      >
+                        <User className="h-4 w-4 mr-2" />
+                        Dashboard
+                      </Link>
+                    )}
+                    {user?.role === "Employer" && (
+                      <Link
+                        to="/dashboard"
+                        className="flex items-center px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200"
+                        onClick={() => setShowDropdown(false)}
+                      >
+                        <User className="h-4 w-4 mr-2" />
+                        Dashboard
+                      </Link>
+                    )}
                     <button
                       onClick={handleLogout}
-                      className="flex items-center w-full px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200"
+                      className="flex items-center w-full px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200 cursor-pointer"
                     >
                       <LogOut className="h-4 w-4 mr-2" />
                       Logout
@@ -109,13 +125,9 @@ const Navbar = () => {
           {/* Mobile menu button */}
           <button
             onClick={() => setShowMobile(!showMobile)}
-            className="md:hidden p-2 rounded-md text-gray-600 hover:text-blue-600 transition-colors duration-300"
+            className="md:hidden p-2 rounded-md text-gray-600 hover:text-blue-600 transition-colors duration-300 cursor-pointer"
           >
-            {showMobile ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
+            {showMobile ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
 
@@ -123,6 +135,7 @@ const Navbar = () => {
         {showMobile && (
           <div className="md:hidden pb-6 pt-2">
             <div className="flex flex-col space-y-3">
+              {/* Common Links for All Users */}
               <Link
                 to="/"
                 className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md transition-colors duration-200"
@@ -130,8 +143,23 @@ const Navbar = () => {
               >
                 Home
               </Link>
-              
-              {isAuthenticated ? (
+              <Link
+                to="/about"
+                className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md transition-colors duration-200"
+                onClick={() => setShowMobile(false)}
+              >
+                About Us
+              </Link>
+              <Link
+                to="/contact"
+                className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md transition-colors duration-200"
+                onClick={() => setShowMobile(false)}
+              >
+                Contact Us
+              </Link>
+
+              {/* Role-Based Links */}
+              {isAuthenticated && user?.role === "Job Seeker" && (
                 <Link
                   to="/jobs"
                   className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md transition-colors duration-200"
@@ -139,45 +167,43 @@ const Navbar = () => {
                 >
                   Jobs
                 </Link>
-              ) : (
-                <>
-                  <Link
-                    to="/about"
-                    className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md transition-colors duration-200"
-                    onClick={() => setShowMobile(false)}
-                  >
-                    About Us
-                  </Link>
-                  <Link
-                    to="/contact"
-                    className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md transition-colors duration-200"
-                    onClick={() => setShowMobile(false)}
-                  >
-                    Contact Us
-                  </Link>
-                </>
               )}
 
-              {isAuthenticated ? (
+              {/* Profile/Dashboard Links for Authenticated Users */}
+              {isAuthenticated && (
                 <>
-                  <Link
-                    to="/dashboard"
-                    className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md transition-colors duration-200"
-                    onClick={() => setShowMobile(false)}
-                  >
-                    Profile
-                  </Link>
+                  {user?.role === "Job Seeker" && (
+                    <Link
+                      to="/profile"
+                      className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md transition-colors duration-200"
+                      onClick={() => setShowMobile(false)}
+                    >
+                      Profile
+                    </Link>
+                  )}
+                  {user?.role === "Employer" && (
+                    <Link
+                      to="/dashboard"
+                      className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md transition-colors duration-200"
+                      onClick={() => setShowMobile(false)}
+                    >
+                      Dashboard
+                    </Link>
+                  )}
                   <button
                     onClick={() => {
                       handleLogout();
                       setShowMobile(false);
                     }}
-                    className="text-left text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md transition-colors duration-200"
+                    className="text-left text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md transition-colors duration-200 cursor-pointer"
                   >
                     Logout
                   </button>
                 </>
-              ) : (
+              )}
+
+              {/* Login Button for Non-Authenticated Users */}
+              {!isAuthenticated && (
                 <Link
                   to="/login"
                   className="bg-blue-600 text-white px-6 py-2.5 rounded-full hover:bg-blue-700 transition-colors duration-300 shadow-md hover:shadow-lg mx-3"

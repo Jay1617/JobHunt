@@ -27,53 +27,31 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const AboutUs = lazy(() => import("./pages/AboutUs"));
 const ContactUs = lazy(() => import("./pages/ContactUs"));
 
-const ROUTE_CONFIG = {
-  PUBLIC: [
-    { path: "/", element: Home },
-    { path: "/login", element: Login },
-    { path: "/register", element: Register },
-    { path: "/otp-verification", element: OtpVerification },
-    { path: "/password/forgot", element: ForgotPassword },
-    { path: "/password/reset/:token", element: ForgotPassword },
-    { path: "/about", element: AboutUs },
-    { path: "/contact", element: ContactUs },
-  ],
-  EMPLOYER: [
-    { path: "/", element: Home },
-    { path: "/dashboard", element: Dashboard },
-    { path: "/post/application/:jobId", element: PostApplication },
-    { path: "/about", element: AboutUs },
-    { path: "/contact", element: ContactUs },
-  ],
-  JOB_SEEKER: [{ path: "/jobs", element: Jobs }],
-};
-
 const ProtectedRoute = ({ children, role }) => {
   const { isAuthenticated, user, loading } = useSelector((state) => state.user);
 
   if (loading) return <LoadingSpinner />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-
-  // Allow Employer to access specified routes
-  if (role === "Employer" && user?.role === "Employer") {
-    return children;
-  }
-
-  // For Job Seeker, maintain original restriction
-  if (role === "Job Seeker" && user?.role !== "Job Seeker") {
-    return <Navigate to="/dashboard" replace />;
-  }
+  if (role && user?.role !== role) return <Navigate to="/dashboard" replace />;
 
   return children;
 };
 
 const App = () => {
   const dispatch = useDispatch();
-  const { user, isAuthenticated } = useSelector((state) => state.user);
+  const { user, isAuthenticated, loading } = useSelector((state) => state.user);
 
   useEffect(() => {
     dispatch(getUser());
   }, [dispatch]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
   return (
     <ErrorBoundary>
@@ -81,64 +59,71 @@ const App = () => {
         <div className="min-h-screen flex flex-col">
           <Navbar />
           <main className="flex-grow">
-            <Suspense
-              fallback={
-                <div className="flex items-center justify-center min-h-[60vh]">
-                  <LoadingSpinner />
-                </div>
-              }
-            >
+            <Suspense fallback={<LoadingSpinner />}>
               <Routes>
-                {/* Render routes based on user authentication and role */}
-                {!isAuthenticated &&
-                  ROUTE_CONFIG.PUBLIC.map(({ path, element: Element }) => (
-                    <Route key={path} path={path} element={<Element />} />
-                  ))}
-
-                {isAuthenticated &&
-                  user?.role === "Employer" &&
-                  ROUTE_CONFIG.EMPLOYER.map(({ path, element: Element }) => (
+                <Route path="/" element={<Home />} />
+                <Route path="/about" element={<AboutUs />} />
+                <Route path="/contact" element={<ContactUs />} />
+                {!isAuthenticated && (
+                  <>
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
                     <Route
-                      key={path}
-                      path={path}
+                      path="/otp-verification"
+                      element={<OtpVerification />}
+                    />
+                    <Route
+                      path="/password/forgot"
+                      element={<ForgotPassword />}
+                    />
+                  </>
+                )}
+                {isAuthenticated && user?.role === "Employer" && (
+                  <>
+                    <Route
+                      path="/dashboard"
                       element={
                         <ProtectedRoute role="Employer">
-                          <Element />
+                          <Dashboard />
                         </ProtectedRoute>
                       }
                     />
-                  ))}
-
-                {isAuthenticated &&
-                  user?.role === "Job Seeker" &&
-                  ROUTE_CONFIG.JOB_SEEKER.map(({ path, element: Element }) => (
                     <Route
-                      key={path}
-                      path={path}
+                      path="/post/application/:jobId"
+                      element={
+                        <ProtectedRoute role="Employer">
+                          <PostApplication />
+                        </ProtectedRoute>
+                      }
+                    />
+                  </>
+                )}
+                {isAuthenticated && user?.role === "Job Seeker" && (
+                  <>
+                    <Route
+                      path="/dashboard"
+                      element={
+                        <ProtectedRoute role="Employer">
+                          <Dashboard />
+                        </ProtectedRoute>
+                      }
+                    />  
+                    <Route
+                      path="/jobs"
                       element={
                         <ProtectedRoute role="Job Seeker">
-                          <Element />
+                          <Jobs />
                         </ProtectedRoute>
                       }
                     />
-                  ))}
-
+                  </>
+                )}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
           </main>
           <Footer />
-          <ToastContainer
-            position="top-right"
-            theme="dark"
-            autoClose={5000}
-            hideProgressBar={false}
-            newestOnTop
-            closeOnClick
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-          />
+          <ToastContainer position="top-right" theme="dark" autoClose={5000} />
         </div>
       </Router>
     </ErrorBoundary>

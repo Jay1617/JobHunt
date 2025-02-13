@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const userSlice = createSlice({
   name: "user",
@@ -96,7 +97,7 @@ export const {
 
 // Thunk Actions
 export const register = (data, navigateTo) => async (dispatch) => {
-  dispatch(registerRequest());
+  dispatch(userSlice.actions.registerRequest());
   try {
     const response = await axios.post(
       "http://localhost:5500/api/v1/user/register",
@@ -107,25 +108,28 @@ export const register = (data, navigateTo) => async (dispatch) => {
       }
     );
     // Navigate to OTP verification page with email
-    navigateTo(`/otp-verification/${data.email}`, {
+    navigateTo(`/otp-verification`, {
       state: { email: data.email },
     });
 
-    dispatch(registerSuccess(response.data));
+    dispatch(userSlice.actions.registerSuccess(response.data));
+    console.log(response.data);
+    
   } catch (error) {
     dispatch(registerFailed(error.response.data.message));
   }
 };
 
 export const verifyOtp = (email, verificationCode) => async (dispatch) => {
-  dispatch(fetchUserRequest());
+  dispatch(userSlice.actions.fetchUserRequest());
   try {
     const response = await axios.post(
       "http://localhost:5500/api/v1/user/verify-otp",
       { email, verificationCode },
       { withCredentials: true, headers: { "Content-Type": "application/json" } }
     );
-    dispatch(fetchUserSuccess(response.data.user)); // Mark as authenticated
+    
+    dispatch(fetchUserSuccess(response.data.user));
     toast.success(response.data.message);
   } catch (error) {
     dispatch(
@@ -140,7 +144,7 @@ export const verifyOtp = (email, verificationCode) => async (dispatch) => {
 };
 
 export const login = (data) => async (dispatch) => {
-  dispatch(loginRequest());
+  dispatch(userSlice.actions.loginRequest());
   try {
     const response = await axios.post(
       "http://localhost:5500/api/v1/user/login",
@@ -150,14 +154,16 @@ export const login = (data) => async (dispatch) => {
         headers: { "Content-Type": "application/json" },
       }
     );
-    dispatch(loginSuccess(response.data));
+    console.log("res: ",response.data);
+    
+    dispatch(userSlice.actions.loginSuccess(response.data));
   } catch (error) {
-    dispatch(loginFailed(error.response.data.message));
+    dispatch(userSlice.actions.loginFailed(error.response.data.message));
   }
 };
 
 export const getUser = () => async (dispatch) => {
-  dispatch(fetchUserRequest());
+  dispatch(userSlice.actions.fetchUserRequest());
   try {
     const response = await axios.get(
       "http://localhost:5500/api/v1/user/my-profile",
@@ -165,9 +171,11 @@ export const getUser = () => async (dispatch) => {
         withCredentials: true,
       }
     );
-    dispatch(fetchUserSuccess(response.data.user));
+    console.log("datttttt: ",response.data.user);
+    
+    dispatch(userSlice.actions.fetchUserSuccess(response.data.user));
   } catch (error) {
-    dispatch(fetchUserFailed(error.response.data.message));
+    dispatch(userSlice.actions.fetchUserFailed(error.response.data.message));
   }
 };
 

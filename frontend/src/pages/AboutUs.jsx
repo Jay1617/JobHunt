@@ -6,19 +6,19 @@ const AboutUs = () => {
     {
       name: "Jay Thummar",
       role: "CEO & Founder",
-      image: "https://i.pravatar.cc/150?img=1",
+      image: "https://i.pravatar.cc/150?img=12",
       bio: "Visionary tech leader driving the future solutions.",
     },
     {
       name: "Vasu Tilva",
       role: "CTO",
-      image: "https://i.pravatar.cc/150?img=1",
+      image: "https://i.pravatar.cc/150?img=2",
       bio: "Tech innovator with a passion for AI",
     },
     {
       name: "Meet Vekariya",
       role: "Head of Operations",
-      image: "https://i.pravatar.cc/150?img=1",
+      image: "https://i.pravatar.cc/150?img=6",
       bio: "Operations expert focused on client success",
     },
   ];
