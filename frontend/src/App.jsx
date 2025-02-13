@@ -122,7 +122,7 @@ const App = () => {
             </Suspense>
           </main>
           <Footer />
-          <ToastContainer position="top-right" theme="dark" autoClose={5000} />
+          <ToastContainer position="bottom-right" theme="light" autoClose={5000} />
         </div>
       </Router>
     </ErrorBoundary>

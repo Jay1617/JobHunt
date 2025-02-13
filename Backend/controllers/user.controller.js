@@ -400,25 +400,48 @@ export const resetPassword = catchAsyncErrors(async (req, res, next) => {
 });
 
 export const updatePassword = catchAsyncErrors(async (req, res, next) => {
+  const { oldPassword, newPassword, confirmPassword } = req.body;
+
+  if (!oldPassword || !newPassword || !confirmPassword) {
+    return next(new ErrorHandler("Please provide all required fields.", 400));
+  }
+
   const user = await User.findById(req.user.id).select("+password");
 
-  const isPasswordMatched = await user.comparePassword(req.body.oldPassword);
+  if (!user) {
+    return next(new ErrorHandler("User not found.", 404));
+  }
+
+  const isPasswordMatched = await user.comparePassword(oldPassword);
 
   if (!isPasswordMatched) {
     return next(new ErrorHandler("Old password is incorrect.", 400));
   }
 
-  if (req.body.newPassword !== req.body.confirmPassword) {
+  if (newPassword !== confirmPassword) {
     return next(
-      new ErrorHandler("New password & confirm password do not match.", 400)
+      new ErrorHandler("New password and confirm password do not match.", 400)
     );
   }
 
-  user.password = req.body.newPassword;
-  await user.save();
-  console.log("Password updates successfully.");
+  if (oldPassword === newPassword) {
+    return next(
+      new ErrorHandler(
+        "New password must be different from the old password.",
+        400
+      )
+    );
+  }
 
-  sendToken(user, 200, "Password updated successfully.", res);
+  user.password = newPassword;
+  await user.save();
+
+  console.log("Password updated successfully.");
+
+  res.status(200).json({
+    success: true,
+    message: "Password updated successfully.",
+  });
 });
 
 export const updateProfile = catchAsyncErrors(async (req, res, next) => {

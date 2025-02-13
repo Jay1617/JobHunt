@@ -113,7 +113,7 @@ export const register = (data, navigateTo) => async (dispatch) => {
     });
 
     dispatch(userSlice.actions.registerSuccess(response.data));
-    console.log(response.data);
+    // console.log(response.data);
     
   } catch (error) {
     dispatch(registerFailed(error.response.data.message));
@@ -154,7 +154,7 @@ export const login = (data) => async (dispatch) => {
         headers: { "Content-Type": "application/json" },
       }
     );
-    console.log("res: ",response.data);
+    // console.log("res: ",response.data);
     
     dispatch(userSlice.actions.loginSuccess(response.data));
   } catch (error) {
@@ -171,7 +171,7 @@ export const getUser = () => async (dispatch) => {
         withCredentials: true,
       }
     );
-    console.log("datttttt: ",response.data.user);
+    // console.log("datttttt: ",response.data.user);
     
     dispatch(userSlice.actions.fetchUserSuccess(response.data.user));
   } catch (error) {
