@@ -32,6 +32,8 @@ const ProtectedRoute = ({ children, role }) => {
 
   if (loading) return <LoadingSpinner />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
+  
+  // If a role is required and the user does not match, redirect to dashboard
   if (role && user?.role !== role) return <Navigate to="/dashboard" replace />;
 
   return children;
@@ -64,60 +66,57 @@ const App = () => {
                 <Route path="/" element={<Home />} />
                 <Route path="/about" element={<AboutUs />} />
                 <Route path="/contact" element={<ContactUs />} />
+
+                {/* Public Routes */}
                 {!isAuthenticated && (
                   <>
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
-                    <Route
-                      path="/otp-verification"
-                      element={<OtpVerification />}
-                    />
-                    <Route
-                      path="/password/forgot"
-                      element={<ForgotPassword />}
-                    />
+                    <Route path="/otp-verification" element={<OtpVerification />} />
+                    <Route path="/password/forgot" element={<ForgotPassword />} />
                   </>
                 )}
-                {isAuthenticated && user?.role === "Employer" && (
+
+                {/* Protected Routes */}
+                {isAuthenticated && (
                   <>
+                    {/* Dashboard accessible to both Job Seekers & Employers */}
                     <Route
                       path="/dashboard"
                       element={
-                        <ProtectedRoute role="Employer">
+                        <ProtectedRoute>
                           <Dashboard />
                         </ProtectedRoute>
                       }
                     />
-                    <Route
-                      path="/post/application/:jobId"
-                      element={
-                        <ProtectedRoute role="Employer">
-                          <PostApplication />
-                        </ProtectedRoute>
-                      }
-                    />
+
+                    {/* Employer-only Routes */}
+                    {user?.role === "Employer" && (
+                      <Route
+                        path="/post/application/:jobId"
+                        element={
+                          <ProtectedRoute role="Employer">
+                            <PostApplication />
+                          </ProtectedRoute>
+                        }
+                      />
+                    )}
+
+                    {/* Job Seeker-only Routes */}
+                    {user?.role === "Job Seeker" && (
+                      <Route
+                        path="/jobs"
+                        element={
+                          <ProtectedRoute role="Job Seeker">
+                            <Jobs />
+                          </ProtectedRoute>
+                        }
+                      />
+                    )}
                   </>
                 )}
-                {isAuthenticated && user?.role === "Job Seeker" && (
-                  <>
-                    <Route
-                      path="/dashboard"
-                      element={
-                        <ProtectedRoute role="Employer">
-                          <Dashboard />
-                        </ProtectedRoute>
-                      }
-                    />  
-                    <Route
-                      path="/jobs"
-                      element={
-                        <ProtectedRoute role="Job Seeker">
-                          <Jobs />
-                        </ProtectedRoute>
-                      }
-                    />
-                  </>
-                )}
+
+                {/* 404 Page */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

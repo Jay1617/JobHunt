@@ -269,7 +269,7 @@ export const verifyAccount = catchAsyncErrors(async (req, res, next) => {
 export const login = catchAsyncErrors(async (req, res, next) => {
   const { email, password, role } = req.body;
 
-  console.log("Login Request:", req.body);
+  // console.log("Login Request:", req.body);
 
   if (!email || !password || !role) {
     return next(

@@ -19,7 +19,7 @@ import {
 
 const Home = () => {
   const { isAuthenticated, user } = useSelector((state) => state.user);
-  console.log(user);
+  // console.log(user);
   
 
   return (
@@ -41,10 +41,10 @@ const Home = () => {
             <div className="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-4">
               {isAuthenticated ? (
                 <>
-                  <button className="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-blue-50 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl">
+                  <button className="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-blue-50 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl cursor-pointer">
                     View Dashboard
                   </button>
-                  <button className="border-2 border-white px-8 py-4 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl">
+                  <button className="border-2 border-white px-8 py-4 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl cursor-pointer">
                     Explore Jobs
                   </button>
                 </>
@@ -224,7 +224,7 @@ const Home = () => {
                 ? 'Explore new opportunities and tools to grow your career.'
                 : 'Join thousands of professionals who\'ve found their dream jobs through our platform.'}
             </p>
-            <button className="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-blue-50 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl">
+            <button className="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-blue-50 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl cursor-pointer">
               {isAuthenticated ? 'Explore Jobs' : 'Get Started Now'}
             </button>
           </div>
