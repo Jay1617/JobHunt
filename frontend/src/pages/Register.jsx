@@ -3,10 +3,15 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { clearAllUserErrors, register } from "../store/slices/userSlice";
 import { toast } from "react-toastify";
-import { FaAddressBook, FaPencilAlt, FaRegUser } from "react-icons/fa";
-import { FaPhoneFlip } from "react-icons/fa6";
+import {
+  FaAddressBook,
+  FaPencilAlt,
+  FaRegUser,
+  FaPhoneAlt,
+} from "react-icons/fa";
 import { MdCategory, MdOutlineMailOutline } from "react-icons/md";
 import { RiLock2Fill } from "react-icons/ri";
+import { motion } from "framer-motion";
 
 const Register = () => {
   const [role, setRole] = useState("");
@@ -18,7 +23,6 @@ const Register = () => {
   const [firstNiche, setFirstNiche] = useState("");
   const [secondNiche, setSecondNiche] = useState("");
   const [thirdNiche, setThirdNiche] = useState("");
-  const [coverLetter, setCoverLetter] = useState("");
   const [resume, setResume] = useState(null);
 
   const nichesArray = [
@@ -44,7 +48,7 @@ const Register = () => {
     "IT Consulting",
   ];
 
-  const { loading, isAuthenticated, error, message } = useSelector(
+  const { loading, isAuthenticated, error } = useSelector(
     (state) => state.user
   );
 
@@ -74,20 +78,13 @@ const Register = () => {
     formData.append("password", password);
 
     if (role === "Job Seeker") {
-      if (
-        !firstNiche ||
-        !secondNiche ||
-        !thirdNiche ||
-        // !coverLetter ||
-        !resume
-      ) {
+      if (!firstNiche || !secondNiche || !thirdNiche || !resume) {
         toast.error("Please fill all required fields for Job Seeker.");
         return;
       }
       formData.append("firstNiche", firstNiche);
       formData.append("secondNiche", secondNiche);
       formData.append("thirdNiche", thirdNiche);
-      // formData.append("coverLetter", coverLetter);
       formData.append("resume", resume);
     }
 
@@ -102,205 +99,278 @@ const Register = () => {
     if (isAuthenticated) {
       navigate("/");
     }
-  }, [dispatch, error, isAuthenticated]);
+  }, [dispatch, error, isAuthenticated, navigate]);
+
+  const inputClasses =
+    "w-full px-4 py-3.5 pl-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-gray-400 text-gray-700 bg-white/50 backdrop-blur-sm";
+  const iconClasses =
+    "absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg";
 
   return (
-    <section className="authPage">
-      <div className="container">
-        <div className="header">
-          <h3>Create a new account</h3>
-        </div>
-        <form onSubmit={handleRegister}>
-          <div className="wrapper">
-            <div className="inputTag">
-              {/* <label>Register As</label> */}
-              <div>
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  required
-                >
-                  <option value="">Select Role</option>
-                  <option value="Employer">Register as an Employer</option>
-                  <option value="Job Seeker">Register as a Job Seeker</option>
-                </select>
-                <FaRegUser />
-              </div>
-            </div>
-          </div>
-          <div className="wrapper">
-            <div className="inputTag">
-              {/* <label>Name</label> */}
-              <div>
-                <input
-                  type="text"
-                  placeholder="Name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-50 py-12 px-4">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="w-full max-w-2xl bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl p-8 sm:p-10"
+      >
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="text-center mb-10"
+        >
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent mb-3">
+            Create Your Account
+          </h2>
+          <p className="text-gray-600">
+            Join us to find your dream job or hire top talent
+          </p>
+        </motion.div>
+
+        <form onSubmit={handleRegister} className="space-y-6">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
+            className="relative group"
+          >
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className={`${inputClasses} cursor-pointer appearance-none`}
+              required
+            >
+              <option value="">Select Role</option>
+              <option value="Employer">Register as an Employer</option>
+              <option value="Job Seeker">Register as a Job Seeker</option>
+            </select>
+            <FaRegUser className={iconClasses} />
+            <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400">
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M19 9l-7 7-7-7"
                 />
-                <FaPencilAlt />
-              </div>
+              </svg>
             </div>
+          </motion.div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+              className="relative group"
+            >
+              <input
+                type="text"
+                placeholder="Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className={inputClasses}
+                required
+              />
+              <FaPencilAlt className={iconClasses} />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.5 }}
+              className="relative group"
+            >
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={inputClasses}
+                required
+              />
+              <MdOutlineMailOutline className={iconClasses} />
+            </motion.div>
           </div>
-          <div className="wrapper">
-            <div className="inputTag">
-              {/* <label>Email Address</label> */}
-              <div>
-                <input
-                  type="email"
-                  placeholder="Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-                <MdOutlineMailOutline />
-              </div>
-            </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.6 }}
+              className="relative group"
+            >
+              <input
+                type="number"
+                placeholder="Mobile"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className={inputClasses}
+                required
+              />
+              <FaPhoneAlt className={iconClasses} />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.7 }}
+              className="relative group"
+            >
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={inputClasses}
+                required
+              />
+              <RiLock2Fill className={iconClasses} />
+            </motion.div>
           </div>
-          <div className="wrapper">
-            <div className="inputTag">
-              {/* <label>Phone</label> */}
-              <div>
-                <input
-                  type="number"
-                  placeholder="Mobile"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  required
-                />
-                <FaPhoneFlip />
-              </div>
-            </div>
-          </div>
-          <div className="wrapper">
-            <div className="inputTag">
-              {/* <label>Address</label> */}
-              <div>
-                <input
-                  type="text"
-                  placeholder="Address"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  required
-                />
-                <FaAddressBook />
-              </div>
-            </div>
-          </div>
-          <div className="wrapper">
-            <div className="inputTag">
-              {/* <label>Password</label> */}
-              <div>
-                <input
-                  type="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-                <RiLock2Fill />
-              </div>
-            </div>
-          </div>
+
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.8 }}
+            className="relative group"
+          >
+            <input
+              type="text"
+              placeholder="Address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              className={inputClasses}
+              required
+            />
+            <FaAddressBook className={iconClasses} />
+          </motion.div>
+
           {role === "Job Seeker" && (
-            <>
-              <div className="wrapper">
-                <div className="inputTag">
-                  {/* <label>Your First Niche</label> */}
-                  <div>
-                    <select
-                      value={firstNiche}
-                      onChange={(e) => setFirstNiche(e.target.value)}
-                      required
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              transition={{ duration: 0.3 }}
+              className="space-y-6"
+            >
+              {[
+                { value: firstNiche, setter: setFirstNiche, label: "First" },
+                { value: secondNiche, setter: setSecondNiche, label: "Second" },
+                { value: thirdNiche, setter: setThirdNiche, label: "Third" },
+              ].map((niche, index) => (
+                <div key={index} className="relative group">
+                  <select
+                    value={niche.value}
+                    onChange={(e) => niche.setter(e.target.value)}
+                    className={`${inputClasses} cursor-pointer appearance-none`}
+                    required
+                  >
+                    <option value="">{`Your ${niche.label} Niche`}</option>
+                    {nichesArray.map((n, i) => (
+                      <option key={i} value={n}>
+                        {n}
+                      </option>
+                    ))}
+                  </select>
+                  <MdCategory className={iconClasses} />
+                  <div className="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400">
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
                     >
-                      <option value="">Your First Niche</option>
-                      {nichesArray.map((niche, index) => (
-                        <option key={index} value={niche}>
-                          {niche}
-                        </option>
-                      ))}
-                    </select>
-                    <MdCategory />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
                   </div>
                 </div>
+              ))}
+
+              <div className="relative group">
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={handleResumeChange}
+                  className={`${inputClasses} file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100`}
+                  required
+                />
+                <label
+                  htmlFor="resumeUpload"
+                  className={`${inputClasses} file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer`}
+                >
+                  Upload Resume
+                </label>
+                <MdCategory className={iconClasses} />
               </div>
-              <div className="wrapper">
-                <div className="inputTag">
-                  {/* <label>Your Second Niche</label> */}
-                  <div>
-                    <select
-                      value={secondNiche}
-                      onChange={(e) => setSecondNiche(e.target.value)}
-                      required
-                    >
-                      <option value="">Your Second Niche</option>
-                      {nichesArray.map((niche, index) => (
-                        <option key={index} value={niche}>
-                          {niche}
-                        </option>
-                      ))}
-                    </select>
-                    <MdCategory />
-                  </div>
-                </div>
-              </div>
-              <div className="wrapper">
-                <div className="inputTag">
-                  {/* <label>Your Third Niche</label> */}
-                  <div>
-                    <select
-                      value={thirdNiche}
-                      onChange={(e) => setThirdNiche(e.target.value)}
-                      required
-                    >
-                      <option value="">Your Third Niche</option>
-                      {nichesArray.map((niche, index) => (
-                        <option key={index} value={niche}>
-                          {niche}
-                        </option>
-                      ))}
-                    </select>
-                    <MdCategory />
-                  </div>
-                </div>
-              </div>
-              {/* <div className="wrapper">
-                <div className="inputTag">
-                  <label>Cover Letter</label>
-                  <div>
-                    <textarea
-                      value={coverLetter}
-                      onChange={(e) => setCoverLetter(e.target.value)}
-                      rows={10}
-                      required
-                    />
-                  </div>
-                </div>
-              </div> */}
-              <div className="wrapper">
-                <div className="inputTag">
-                  <label>Resume</label>
-                  <div>
-                    <input
-                      placeholder="Resume"
-                      type="file"
-                      onChange={handleResumeChange}
-                      style={{ border: "none" }}
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
-            </>
+            </motion.div>
           )}
-          <button type="submit" disabled={loading}>
-            {loading ? "Registering..." : "Register"}
-          </button>
-          <Link to={"/login"}>Login Now</Link>
+
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.9 }}
+            type="submit"
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3.5 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
+          >
+            {loading ? (
+              <div className="flex items-center justify-center space-x-2">
+                <svg
+                  className="animate-spin h-5 w-5 text-white"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="none"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+                <span>Registering...</span>
+              </div>
+            ) : (
+              "Create Account"
+            )}
+          </motion.button>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1 }}
+            className="text-center mt-6"
+          >
+            <p className="text-gray-600">
+              Already have an account?{" "}
+              <Link
+                to="/login"
+                className="text-blue-600 hover:text-blue-700 font-medium hover:underline transition-colors"
+              >
+                Login Now
+              </Link>
+            </p>
+          </motion.div>
         </form>
-      </div>
-    </section>
+      </motion.div>
+    </div>
   );
 };
 

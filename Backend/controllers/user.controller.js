@@ -5,6 +5,8 @@ import { catchAsyncErrors } from "../middlewares/catchAsyncErrors.js";
 import ErrorHandler from "../middlewares/error.js";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
+import { v2 as cloudinary } from "cloudinary";
+import { log } from "console";
 
 export const register = catchAsyncErrors(async (req, res, next) => {
   try {
@@ -56,7 +58,9 @@ export const register = catchAsyncErrors(async (req, res, next) => {
       ],
     });
     if (existingUser) {
-      return next(new ErrorHandler("Email or Phone is already registered.", 400));
+      return next(
+        new ErrorHandler("Email or Phone is already registered.", 400)
+      );
     }
 
     // Check if user has exceeded the maximum number of registration attempts
@@ -106,22 +110,36 @@ export const register = catchAsyncErrors(async (req, res, next) => {
     };
     if (req.files && req.files.resume) {
       const { resume } = req.files;
+      console.log(resume);
+
       if (resume) {
         try {
+          // Log file details
+          console.log(resume);
+          console.log("Uploading to Cloudinary...");
+
+          // Upload the file
           const cloudinaryResponse = await cloudinary.uploader.upload(
             resume.tempFilePath,
             { folder: "Job_Seekers_Resume" }
           );
+
+          // Check for errors
           if (!cloudinaryResponse || cloudinaryResponse.error) {
             return next(
               new ErrorHandler("Failed to upload resume to cloud.", 500)
             );
           }
+
+          // Save resume details
           userData.resume = {
             public_id: cloudinaryResponse.public_id,
             url: cloudinaryResponse.secure_url,
           };
+
+          console.log("Resume uploaded successfully:", userData.resume);
         } catch (error) {
+          console.error("Cloudinary Upload Error:", error);
           return next(new ErrorHandler("Failed to upload resume", 500));
         }
       }
@@ -183,6 +201,8 @@ const generateEmailTemplate = (verificationCode) => {
 
 export const verifyAccount = catchAsyncErrors(async (req, res, next) => {
   const { email, verificationCode } = req.body;
+
+  console.log(req.body);
 
   try {
     const userAllEntries = await User.find({
@@ -247,25 +267,31 @@ export const verifyAccount = catchAsyncErrors(async (req, res, next) => {
 
 //login
 export const login = catchAsyncErrors(async (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, role } = req.body;
 
-  //   console.log("Login Request:", req.body);
+  console.log("Login Request:", req.body);
 
-  if (!email || !password) {
-    return next(new ErrorHandler("Email and password are required.", 400));
+  if (!email || !password || !role) {
+    return next(
+      new ErrorHandler("Email, password, and role are required.", 400)
+    );
   }
-  const user = await User.findOne({ email, accountVerified: true }).select(
-    "+password"
-  );
-  //   console.log(user);
+
+  const user = await User.findOne({
+    email,
+    role,
+    accountVerified: true,
+  }).select("+password");
 
   if (!user) {
-    return next(new ErrorHandler("Invalid email or password.", 400));
+    return next(new ErrorHandler("Invalid email, password, or role.", 400));
   }
+
   const isPasswordMatched = await user.comparePassword(password);
   if (!isPasswordMatched) {
     return next(new ErrorHandler("Invalid email or password.", 400));
   }
+
   sendToken(user, 200, "User logged in successfully.", res);
 });
 
@@ -391,7 +417,7 @@ export const updatePassword = catchAsyncErrors(async (req, res, next) => {
   user.password = req.body.newPassword;
   await user.save();
   console.log("Password updates successfully.");
-  
+
   sendToken(user, 200, "Password updated successfully.", res);
 });
 
@@ -447,8 +473,7 @@ export const updateProfile = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
-
-//updated controller to verify email 
+//updated controller to verify email
 // export const updateProfile = catchAsyncErrors(async (req, res, next) => {
 //   const newUserData = {
 //     name: req.body.name,
@@ -463,7 +488,7 @@ export const updateProfile = catchAsyncErrors(async (req, res, next) => {
 //   };
 
 //   const { firstNiche, secondNiche, thirdNiche } = newUserData.niches;
-  
+
 //   if (
 //     req.user.role === "Job Seeker" &&
 //     (!firstNiche || !secondNiche || !thirdNiche)
