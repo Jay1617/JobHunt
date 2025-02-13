@@ -36,7 +36,6 @@ const Login = () => {
     if (isAuthenticated && user) {
       toast.success("Login successful! 🎉");
 
-      // Redirect based on user role
       if (user.role === "Employer") {
         navigate("/dashboard", { replace: true });
       } else if (user.role === "Job Seeker") {
@@ -66,7 +65,7 @@ const Login = () => {
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer"
               required
             >
               <option value="">Select Role</option>
@@ -106,7 +105,7 @@ const Login = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
           >
             {loading ? "Logging in..." : "Login"}
           </button>

@@ -297,19 +297,26 @@ const Register = () => {
                 </div>
               ))}
 
+              {/* Resume Upload Section */}
               <div className="relative group">
                 <input
                   type="file"
                   accept=".pdf,.doc,.docx"
                   onChange={handleResumeChange}
-                  className={`${inputClasses} file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100`}
+                  className="hidden"
+                  id="resumeUpload"
                   required
                 />
                 <label
                   htmlFor="resumeUpload"
-                  className={`${inputClasses} file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer`}
+                  className={`${inputClasses} cursor-pointer flex items-center justify-between`}
                 >
-                  Upload Resume
+                  <span className="text-gray-700">
+                    {resume ? resume.name : "Upload Resume"}
+                  </span>
+                  <span className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-100 transition-colors">
+                    Browse
+                  </span>
                 </label>
                 <MdCategory className={iconClasses} />
               </div>
@@ -322,7 +329,7 @@ const Register = () => {
             transition={{ delay: 0.9 }}
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3.5 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
+            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3.5 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed disabled:hover:transform-none"
           >
             {loading ? (
               <div className="flex items-center justify-center space-x-2">
