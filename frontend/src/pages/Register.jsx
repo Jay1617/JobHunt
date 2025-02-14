@@ -62,13 +62,13 @@ const Register = () => {
 
   const handleRegister = (e) => {
     e.preventDefault();
-
+  
     // Basic client-side validation
     if (!role || !name || !email || !phone || !address || !password) {
       toast.error("Please fill all required fields.");
       return;
     }
-
+  
     const formData = new FormData();
     formData.append("role", role);
     formData.append("name", name);
@@ -76,7 +76,7 @@ const Register = () => {
     formData.append("phone", phone);
     formData.append("address", address);
     formData.append("password", password);
-
+  
     if (role === "Job Seeker") {
       if (!firstNiche || !secondNiche || !thirdNiche || !resume) {
         toast.error("Please fill all required fields for Job Seeker.");
@@ -87,7 +87,13 @@ const Register = () => {
       formData.append("thirdNiche", thirdNiche);
       formData.append("resume", resume);
     }
-
+  
+    // Log FormData contents
+    // console.log("FormData contents:");
+    // for (let pair of formData.entries()) {
+    //   console.log(pair[0], pair[1]);
+    // }
+    
     dispatch(register(formData, navigate));
   };
 

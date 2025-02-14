@@ -1,93 +1,108 @@
-/* OTP Verification Page Styles */
+/* General Page Styling */
 .otp-verification-page {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background: #f4f4f9; /* Light background color */
-    font-family: "Roboto", sans-serif;
-  }
-  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #f4f4f9;
+  font-family: "Poppins", sans-serif;
+  padding: 20px;
+}
+
+/* OTP Container */
+.otp-container {
+  text-align: center;
+  padding: 35px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  max-width: 420px;
+  width: 100%;
+  background: #ffffff;
+  transition: transform 0.3s ease-in-out;
+}
+
+.otp-container h1 {
+  font-size: 32px;
+  margin-bottom: 15px;
+  color: #222;
+  font-weight: 600;
+}
+
+.otp-container p {
+  color: #555;
+  font-size: 16px;
+  margin-bottom: 25px;
+}
+
+/* OTP Input Fields */
+.otp-input-container {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.otp-input {
+  width: 50px;
+  height: 55px;
+  font-size: 1.6rem;
+  text-align: center;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.3s ease;
+  background: #f9f9f9;
+  font-weight: 700; /* Bold OTP Digits */
+}
+
+.otp-input:focus {
+  border-color: #0056b3;
+  background: #fff;
+  box-shadow: 0 0 8px rgba(0, 86, 179, 0.3);
+}
+
+/* OTP Verification Button */
+.verify-button {
+  background: #0056b3;
+  color: #fff;
+  font-size: 1rem;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s;
+  width: 100%;
+  font-weight: 500;
+  box-sizing: border-box;
+}
+
+.verify-button:hover {
+  background: #004a9a;
+  transform: scale(1.02);
+}
+
+.verify-button:active {
+  transform: scale(0.98);
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
   .otp-container {
-    text-align: center;
-    padding: 40px 30px; /* Increased padding for better spacing */
-    border-radius: 12px;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15); /* Subtle box shadow */
-    max-width: 420px;
-    width: 100%;
-    background: #ffffff;
+    padding: 25px 20px;
   }
-  
+
   .otp-container h1 {
-    font-size: 36px;
-    margin-bottom: 15px;
-    color: #333; /* Dark text color */
+    font-size: 28px;
   }
-  
-  .otp-container p {
-    color: #666;
-    line-height: 1.4;
-    font-size: 16px;
-    margin-bottom: 30px; /* More spacing between text and inputs */
-  }
-  
+
   .otp-input-container {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 25px;
+    gap: 8px;
   }
-  
+
   .otp-input {
-    width: 55px; /* Slightly wider input for better usability */
-    height: 55px;
-    font-size: 1.5rem;
-    text-align: center;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    outline: none;
-    transition: all 0.3s ease;
-    background: #f9f9f9;
+    width: 42px;
+    height: 50px;
+    font-size: 1.4rem;
+    font-weight: 700;
   }
-  
-  .otp-input:focus {
-    border-color: #0056b3; /* Green focus border */
-    background: #fff; /* Clean white background on focus */
-  }
-  
-  .verify-button {
-    background: #0056b3;
-    color: #fff;
-    font-size: 1rem;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-    width: 100%;
-    box-sizing: border-box; /* Ensure padding is included in width */
-  }
-  
-  .verify-button:hover {
-    background: #004a9a; /* Darker green on hover */
-  }
-  
-  /* Responsive Design */
-  @media (max-width: 600px) {
-    .otp-container {
-      padding: 25px 20px; /* Reduced padding for mobile */
-    }
-  
-    .otp-container h1 {
-      font-size: 30px; /* Adjusted font size for smaller screens */
-    }
-  
-    .otp-input-container {
-      gap: 8px; /* Reduced gap between input fields */
-    }
-  
-    .otp-input {
-      width: 45px; /* Smaller input fields for mobile */
-    }
-  }
-  
+}

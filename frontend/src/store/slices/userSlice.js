@@ -96,25 +96,26 @@ export const {
 } = userSlice.actions;
 
 // Thunk Actions
-export const register = (data, navigateTo) => async (dispatch) => {
+export const register = (formData, navigateTo) => async (dispatch) => {
   dispatch(userSlice.actions.registerRequest());
+
   try {
+    const email = formData.get("email");
+
     const response = await axios.post(
       "http://localhost:5500/api/v1/user/register",
-      data,
+      formData,
       {
         withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
       }
     );
-    // Navigate to OTP verification page with email
-    console.log("Email:", data.email);
-    navigateTo(`/verify-otp/${data.email}`, {
-      state: { email: data.email },
+    // console.log("Email:", email);
+    navigateTo(`/verify-otp/${email}`, {
+      state: { email: email },
     });
 
     dispatch(userSlice.actions.registerSuccess(response.data));
-    // console.log(response.data);
   } catch (error) {
     dispatch(registerFailed(error.response.data.message));
   }
@@ -123,7 +124,7 @@ export const register = (data, navigateTo) => async (dispatch) => {
 export const verifyOtp = (email, verificationCode) => async (dispatch) => {
   dispatch(userSlice.actions.fetchUserRequest());
   try {
-    console.log("==>", email);
+    // console.log("==>", email);
     const response = await axios.post(
       "http://localhost:5500/api/v1/user/verify-otp",
       { email, verificationCode },

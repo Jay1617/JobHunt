@@ -12,15 +12,18 @@ const OtpVerification = () => {
 
   const { email } = useParams();
   const { isAuthenticated, loading } = useSelector((state) => state.user);
-  console.log("this is email: ", email);
+  // console.log("this is email: ", email);
 
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
 
   const handleChange = (value, index) => {
     if (!/^\d*$/.test(value)) return;
+
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
+
+    // console.log("Current OTP array:", newOtp); 
 
     if (value && index < otp.length - 1) {
       document.getElementById(`otp-input-${index + 1}`).focus();
@@ -36,15 +39,26 @@ const OtpVerification = () => {
   const handleOtpVerification = async (e) => {
     e.preventDefault();
     const enteredOtp = otp.join("");
-
+    
+    // console.log("Before submission:", {
+    //   email,
+    //   verificationCode: enteredOtp,
+    //   otpLength: enteredOtp.length
+    // });
+  
     if (enteredOtp.length !== 6) {
       toast.error("Please enter a valid 6-digit OTP.");
       return;
     }
+  
+    if (!/^\d{6}$/.test(enteredOtp)) {
+      toast.error("OTP must contain only numbers");
+      return;
+    }
 
-    dispatch(verifyOtp(email, enteredOtp)).then(() => {
-      navigate("/");
-    });
+    const numericOtp = parseInt(enteredOtp, 10);
+    
+    dispatch(verifyOtp(email, numericOtp));
   };
 
   return (
