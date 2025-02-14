@@ -7,20 +7,25 @@ const userSlice = createSlice({
   initialState: {
     loading: false,
     isAuthenticated: false,
+    isInitialized: false,
     user: null,
     error: null,
     message: null,
   },
   reducers: {
     // Register Actions
+    initializeAuthSuccess(state) {
+      state.isInitialized = true;
+    },
     registerRequest(state) {
       state.loading = true;
       state.error = null;
     },
     registerSuccess(state, action) {
       state.loading = false;
-      state.isAuthenticated = false;
-      state.user = null;
+      state.isAuthenticated = true;
+      state.isInitialized = true;
+      state.user = action.payload.user;
       state.message = action.payload.message;
     },
     registerFailed(state, action) {
@@ -37,6 +42,7 @@ const userSlice = createSlice({
     loginSuccess(state, action) {
       state.loading = false;
       state.isAuthenticated = true;
+      state.isInitialized = true;
       state.user = action.payload.user;
       state.message = action.payload.message;
     },
@@ -97,11 +103,10 @@ export const {
 
 // Thunk Actions
 export const register = (formData, navigateTo) => async (dispatch) => {
-  dispatch(userSlice.actions.registerRequest());
-
+  dispatch(registerRequest());
   try {
     const email = formData.get("email");
-
+    
     const response = await axios.post(
       "http://localhost:5500/api/v1/user/register",
       formData,
@@ -110,12 +115,13 @@ export const register = (formData, navigateTo) => async (dispatch) => {
         headers: { "Content-Type": "multipart/form-data" },
       }
     );
-    // console.log("Email:", email);
+
+    dispatch(registerSuccess(response.data));
+    await dispatch(getUser()).unwrap();
+    
     navigateTo(`/verify-otp/${email}`, {
       state: { email: email },
     });
-
-    dispatch(userSlice.actions.registerSuccess(response.data));
   } catch (error) {
     dispatch(registerFailed(error.response.data.message));
   }
@@ -146,7 +152,7 @@ export const verifyOtp = (email, verificationCode) => async (dispatch) => {
 };
 
 export const login = (data) => async (dispatch) => {
-  dispatch(userSlice.actions.loginRequest());
+  dispatch(loginRequest());
   try {
     const response = await axios.post(
       "http://localhost:5500/api/v1/user/login",
@@ -156,11 +162,11 @@ export const login = (data) => async (dispatch) => {
         headers: { "Content-Type": "application/json" },
       }
     );
-    // console.log("res: ",response.data);
 
-    dispatch(userSlice.actions.loginSuccess(response.data));
+    dispatch(loginSuccess(response.data));
+    await dispatch(getUser()).unwrap();
   } catch (error) {
-    dispatch(userSlice.actions.loginFailed(error.response.data.message));
+    dispatch(loginFailed(error.response.data.message));
   }
 };
 

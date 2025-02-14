@@ -32,8 +32,16 @@ const ProtectedRoute = ({ children, role }) => {
 
   if (loading) return <LoadingSpinner />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-
   if (role && user?.role !== role) return <Navigate to="/dashboard" replace />;
+
+  return children;
+};
+
+const AuthRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useSelector((state) => state.user);
+
+  if (loading) return <LoadingSpinner />;
+  if (isAuthenticated) return <Navigate to="/dashboard" replace />;
 
   return children;
 };
@@ -46,14 +54,6 @@ const App = () => {
     dispatch(getUser());
   }, [dispatch]);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
   return (
     <ErrorBoundary>
       <Router>
@@ -62,62 +62,71 @@ const App = () => {
           <main className="flex-grow">
             <Suspense fallback={<LoadingSpinner />}>
               <Routes>
+                {/* Public Routes */}
                 <Route path="/" element={<Home />} />
                 <Route path="/about" element={<AboutUs />} />
                 <Route path="/contact" element={<ContactUs />} />
 
-                {/* Public Routes */}
-                {!isAuthenticated && (
-                  <>
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register />} />
-                    <Route
-                      path="/verify-otp/:email"
-                      element={<OtpVerification />}
-                    />
-                    <Route
-                      path="/password/forgot"
-                      element={<ForgotPassword />}
-                    />
-                  </>
-                )}
+                <Route
+                  path="/login"
+                  element={
+                    <AuthRoute>
+                      <Login />
+                    </AuthRoute>
+                  }
+                />
+                <Route
+                  path="/register"
+                  element={
+                    <AuthRoute>
+                      <Register />
+                    </AuthRoute>
+                  }
+                />
+                <Route
+                  path="/verify-otp/:email"
+                  element={
+                    <AuthRoute>
+                      <OtpVerification />
+                    </AuthRoute>
+                  }
+                />
+                <Route
+                  path="/password/forgot"
+                  element={
+                    <AuthRoute>
+                      <ForgotPassword />
+                    </AuthRoute>
+                  }
+                />
 
                 {/* Protected Routes */}
-                {isAuthenticated && (
-                  <>
-                    {/* Dashboard accessible to both Job Seekers & Employers */}
-                    <Route
-                      path="/dashboard"
-                      element={
-                        <ProtectedRoute>
-                          <Dashboard />
-                        </ProtectedRoute>
-                      }
-                    />
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
 
-                    {/* Job Seeker-only Routes */}
-                    {user?.role === "Job Seeker" && (
-                      <>
-                        <Route
-                          path="/jobs"
-                          element={
-                            <ProtectedRoute role="Job Seeker">
-                              <Jobs />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/post/application/:jobId"
-                          element={
-                            <ProtectedRoute role="Job Seeker">
-                              <PostApplication />
-                            </ProtectedRoute>
-                          }
-                        />
-                      </>
-                    )}
-                  </>
-                )}
+                {/* Job Seeker-specific Routes */}
+                <Route
+                  path="/jobs"
+                  element={
+                    <ProtectedRoute role="Job Seeker">
+                      <Jobs />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/post/application/:jobId"
+                  element={
+                    <ProtectedRoute role="Job Seeker">
+                      <PostApplication />
+                    </ProtectedRoute>
+                  }
+                />
 
                 {/* 404 Page */}
                 <Route path="*" element={<NotFound />} />
@@ -125,11 +134,7 @@ const App = () => {
             </Suspense>
           </main>
           <Footer />
-          <ToastContainer
-            position="bottom-right"
-            theme="light"
-            autoClose={5000}
-          />
+          <ToastContainer position="bottom-right" theme="light" autoClose={5000} />
         </div>
       </Router>
     </ErrorBoundary>
