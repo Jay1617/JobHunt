@@ -38,10 +38,12 @@ const ProtectedRoute = ({ children, role }) => {
 };
 
 const AuthRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useSelector((state) => state.user);
+  const { isAuthenticated, user, loading } = useSelector((state) => state.user);
 
   if (loading) return <LoadingSpinner />;
-  if (isAuthenticated) return <Navigate to="/dashboard" replace />;
+  if (isAuthenticated) {
+    return <Navigate to={user?.role === "Job Seeker" ? "/jobs" : "/dashboard"} replace />;
+  }
 
   return children;
 };
