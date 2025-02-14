@@ -84,170 +84,233 @@ const PostApplication = () => {
   };
 
   return (
-    <>
-      <article className="application_page">
-        <form>
-          <h3>Application Form</h3>
-          <div>
-            <label>Job Title</label>
-            <input type="text" placeholder={singleJob.title} disabled />
-          </div>
-          <div>
-            <label>Your Name</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-          <div>
-            <label>Your Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div>
-            <label>Phone Number</label>
-            <input
-              type="number"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-            />
-          </div>
-          <div>
-            <label>Address</label>
-            <input
-              type="text"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-            />
-          </div>
-          {user && user.role === "Job Seeker" && (
-            <>
-              <div>
-                <label>Coverletter</label>
-                <textarea
-                  value={coverLetter}
-                  onChange={(e) => setCoverLetter(e.target.value)}
-                  rows={10}
-                />
-              </div>
-              <div>
-                <label>Resume</label>
-                <input type="file" onChange={resumeHandler} />
-              </div>
-            </>
-          )}
-
-          {isAuthenticated && user.role === "Job Seeker" && (
-            <div style={{ alignItems: "flex-end" }}>
-              <button
-                className="btn"
-                onClick={handlePostApplication}
-                disabled={loading}
-              >
-                Apply
-              </button>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8 px-4">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Application Form */}
+        <div className="bg-white rounded-xl shadow-lg p-8">
+          <h3 className="text-2xl font-bold text-gray-800 mb-6">
+            Application Form
+          </h3>
+          <form className="space-y-6">
+            <div className="form-group">
+              <label className="block text-gray-700 font-medium mb-2">
+                Job Title
+              </label>
+              <input
+                type="text"
+                placeholder={singleJob.title}
+                disabled
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100"
+              />
             </div>
-          )}
-        </form>
 
-        <div className="job-details">
-          <header>
-            <h3>{singleJob.title}</h3>
+            <div className="form-group">
+              <label className="block text-gray-700 font-medium mb-2">
+                Your Name
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="block text-gray-700 font-medium mb-2">
+                Your Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="block text-gray-700 font-medium mb-2">
+                Phone Number
+              </label>
+              <input
+                type="number"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="block text-gray-700 font-medium mb-2">
+                Address
+              </label>
+              <input
+                type="text"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {user && user.role === "Job Seeker" && (
+              <>
+                <div className="form-group">
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Cover Letter
+                  </label>
+                  <textarea
+                    value={coverLetter}
+                    onChange={(e) => setCoverLetter(e.target.value)}
+                    rows={5}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Resume
+                  </label>
+                  <input
+                    type="file"
+                    onChange={resumeHandler}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </>
+            )}
+
+            {isAuthenticated && user.role === "Job Seeker" && (
+              <div className="flex justify-end">
+                <button
+                  onClick={handlePostApplication}
+                  disabled={loading}
+                  className="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition-all duration-300"
+                >
+                  {loading ? "Applying..." : "Apply"}
+                </button>
+              </div>
+            )}
+          </form>
+        </div>
+
+        {/* Job Details */}
+        <div className="bg-white rounded-xl shadow-lg p-8">
+          <header className="mb-6">
+            <h3 className="text-2xl font-bold text-gray-800 mb-2">
+              {singleJob.title}
+            </h3>
             {singleJob.personalWebsite && (
-              <Link target="_blank" to={singleJob.personalWebsite.url}>
+              <Link
+                target="_blank"
+                to={singleJob.personalWebsite.url}
+                className="text-blue-600 hover:text-blue-700"
+              >
                 {singleJob.personalWebsite.title}
               </Link>
             )}
-            <p>{singleJob.location}</p>
-            <p>Rs. {singleJob.salary} a month</p>
+            <p className="text-gray-600 mt-2">
+              <FaLocationDot className="inline-block mr-2" />
+              {singleJob.location}
+            </p>
+            <p className="text-gray-600 mt-1">
+              <IoMdCash className="inline-block mr-2" />
+              Rs. {singleJob.salary} a month
+            </p>
           </header>
-          <hr />
+          <hr className="my-6" />
+
           <section>
-            <div className="wrapper">
-              <h3>Job details</h3>
-              <div>
-                <IoMdCash />
-                <div>
-                  <span>Pay</span>
-                  <span>{singleJob.salary} a month</span>
+            <div className="mb-6">
+              <h3 className="text-xl font-bold text-gray-800 mb-4">
+                Job Details
+              </h3>
+              <div className="space-y-4">
+                <div className="flex items-center">
+                  <IoMdCash className="w-6 h-6 text-blue-600 mr-4" />
+                  <div>
+                    <span className="block text-gray-700 font-medium">Pay</span>
+                    <span className="text-gray-600">
+                      Rs. {singleJob.salary} a month
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <FaToolbox />
-                <div>
-                  <span>Job type</span>
-                  <span>{singleJob.jobType}</span>
+                <div className="flex items-center">
+                  <FaToolbox className="w-6 h-6 text-blue-600 mr-4" />
+                  <div>
+                    <span className="block text-gray-700 font-medium">
+                      Job Type
+                    </span>
+                    <span className="text-gray-600">{singleJob.jobType}</span>
+                  </div>
                 </div>
               </div>
             </div>
-            <hr />
-            <div className="wrapper">
-              <h3>Location</h3>
-              <div className="location-wrapper">
-                <FaLocationDot />
-                <span>{singleJob.location}</span>
+            <hr className="my-6" />
+
+            <div className="mb-6">
+              <h3 className="text-xl font-bold text-gray-800 mb-4">Location</h3>
+              <div className="flex items-center">
+                <FaLocationDot className="w-6 h-6 text-blue-600 mr-4" />
+                <span className="text-gray-600">{singleJob.location}</span>
               </div>
             </div>
-            <hr />
-            <div className="wrapper">
-              <h3>Full Job Description</h3>
-              <p>{singleJob.introduction}</p>
+            <hr className="my-6" />
+
+            <div>
+              <h3 className="text-xl font-bold text-gray-800 mb-4">
+                Full Job Description
+              </h3>
+              <p className="text-gray-600 mb-6">{singleJob.introduction}</p>
+
               {singleJob.qualifications && (
-                <div>
-                  <h4>Qualifications</h4>
-                  <ul>
-                    {qualifications.map((element) => {
-                      return (
-                        <li key={element} style={{ listStyle: "inside" }}>
-                          {element}
-                        </li>
-                      );
-                    })}
+                <div className="mb-6">
+                  <h4 className="text-lg font-bold text-gray-800 mb-2">
+                    Qualifications
+                  </h4>
+                  <ul className="list-disc list-inside text-gray-600">
+                    {qualifications.map((element) => (
+                      <li key={element}>{element}</li>
+                    ))}
                   </ul>
                 </div>
               )}
+
               {singleJob.responsibilities && (
-                <div>
-                  <h4>Responsibilities</h4>
-                  <ul>
-                    {responsibilities.map((element) => {
-                      return (
-                        <li key={element} style={{ listStyle: "inside" }}>
-                          {element}
-                        </li>
-                      );
-                    })}
+                <div className="mb-6">
+                  <h4 className="text-lg font-bold text-gray-800 mb-2">
+                    Responsibilities
+                  </h4>
+                  <ul className="list-disc list-inside text-gray-600">
+                    {responsibilities.map((element) => (
+                      <li key={element}>{element}</li>
+                    ))}
                   </ul>
                 </div>
               )}
+
               {singleJob.offers && (
-                <div>
-                  <h4>Offering</h4>
-                  <ul>
-                    {offering.map((element) => {
-                      return (
-                        <li key={element} style={{ listStyle: "inside" }}>
-                          {element}
-                        </li>
-                      );
-                    })}
+                <div className="mb-6">
+                  <h4 className="text-lg font-bold text-gray-800 mb-2">
+                    Offering
+                  </h4>
+                  <ul className="list-disc list-inside text-gray-600">
+                    {offering.map((element) => (
+                      <li key={element}>{element}</li>
+                    ))}
                   </ul>
                 </div>
               )}
             </div>
           </section>
-          <hr />
+          <hr className="my-6" />
+
           <footer>
-            <h3>Job Niche</h3>
-            <p>{singleJob.jobNiche}</p>
+            <h3 className="text-xl font-bold text-gray-800 mb-2">Job Niche</h3>
+            <p className="text-gray-600">{singleJob.jobNiche}</p>
           </footer>
         </div>
-      </article>
-    </>
+      </div>
+    </div>
   );
 };
 

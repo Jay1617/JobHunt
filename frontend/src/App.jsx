@@ -32,8 +32,7 @@ const ProtectedRoute = ({ children, role }) => {
 
   if (loading) return <LoadingSpinner />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-  
-  // If a role is required and the user does not match, redirect to dashboard
+
   if (role && user?.role !== role) return <Navigate to="/dashboard" replace />;
 
   return children;
@@ -72,8 +71,14 @@ const App = () => {
                   <>
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
-                    <Route path="/otp-verification" element={<OtpVerification />} />
-                    <Route path="/password/forgot" element={<ForgotPassword />} />
+                    <Route
+                      path="/verify-otp/:email"
+                      element={<OtpVerification />}
+                    />
+                    <Route
+                      path="/password/forgot"
+                      element={<ForgotPassword />}
+                    />
                   </>
                 )}
 
@@ -90,28 +95,26 @@ const App = () => {
                       }
                     />
 
-                    {/* Employer-only Routes */}
-                    {user?.role === "Employer" && (
-                      <Route
-                        path="/post/application/:jobId"
-                        element={
-                          <ProtectedRoute role="Employer">
-                            <PostApplication />
-                          </ProtectedRoute>
-                        }
-                      />
-                    )}
-
                     {/* Job Seeker-only Routes */}
                     {user?.role === "Job Seeker" && (
-                      <Route
-                        path="/jobs"
-                        element={
-                          <ProtectedRoute role="Job Seeker">
-                            <Jobs />
-                          </ProtectedRoute>
-                        }
-                      />
+                      <>
+                        <Route
+                          path="/jobs"
+                          element={
+                            <ProtectedRoute role="Job Seeker">
+                              <Jobs />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/post/application/:jobId"
+                          element={
+                            <ProtectedRoute role="Job Seeker">
+                              <PostApplication />
+                            </ProtectedRoute>
+                          }
+                        />
+                      </>
                     )}
                   </>
                 )}
@@ -122,7 +125,11 @@ const App = () => {
             </Suspense>
           </main>
           <Footer />
-          <ToastContainer position="bottom-right" theme="light" autoClose={5000} />
+          <ToastContainer
+            position="bottom-right"
+            theme="light"
+            autoClose={5000}
+          />
         </div>
       </Router>
     </ErrorBoundary>

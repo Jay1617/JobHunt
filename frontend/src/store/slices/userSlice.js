@@ -87,7 +87,7 @@ export const {
   loginRequest,
   loginSuccess,
   loginFailed,
-  fetchUserRequest, 
+  fetchUserRequest,
   fetchUserSuccess,
   fetchUserFailed,
   logoutSuccess,
@@ -108,13 +108,13 @@ export const register = (data, navigateTo) => async (dispatch) => {
       }
     );
     // Navigate to OTP verification page with email
-    navigateTo(`/otp-verification`, {
+    console.log("Email:", data.email);
+    navigateTo(`/verify-otp/${data.email}`, {
       state: { email: data.email },
     });
 
     dispatch(userSlice.actions.registerSuccess(response.data));
     // console.log(response.data);
-    
   } catch (error) {
     dispatch(registerFailed(error.response.data.message));
   }
@@ -123,12 +123,13 @@ export const register = (data, navigateTo) => async (dispatch) => {
 export const verifyOtp = (email, verificationCode) => async (dispatch) => {
   dispatch(userSlice.actions.fetchUserRequest());
   try {
+    console.log("==>", email);
     const response = await axios.post(
       "http://localhost:5500/api/v1/user/verify-otp",
       { email, verificationCode },
       { withCredentials: true, headers: { "Content-Type": "application/json" } }
     );
-    
+
     dispatch(fetchUserSuccess(response.data.user));
     toast.success(response.data.message);
   } catch (error) {
@@ -155,7 +156,7 @@ export const login = (data) => async (dispatch) => {
       }
     );
     // console.log("res: ",response.data);
-    
+
     dispatch(userSlice.actions.loginSuccess(response.data));
   } catch (error) {
     dispatch(userSlice.actions.loginFailed(error.response.data.message));
@@ -172,7 +173,7 @@ export const getUser = () => async (dispatch) => {
       }
     );
     // console.log("datttttt: ",response.data.user);
-    
+
     dispatch(userSlice.actions.fetchUserSuccess(response.data.user));
   } catch (error) {
     dispatch(userSlice.actions.fetchUserFailed(error.response.data.message));

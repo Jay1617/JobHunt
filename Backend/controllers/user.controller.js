@@ -202,6 +202,7 @@ const generateEmailTemplate = (verificationCode) => {
 export const verifyAccount = catchAsyncErrors(async (req, res, next) => {
   const { email, verificationCode } = req.body;
 
+  console.log("LLLLLLLL:");
   console.log(req.body);
 
   try {
@@ -209,6 +210,8 @@ export const verifyAccount = catchAsyncErrors(async (req, res, next) => {
       email,
       accountVerified: false,
     }).sort({ createdAt: -1 });
+
+    console.log(userAllEntries);
 
     if (!userAllEntries || userAllEntries.length === 0) {
       return next(new ErrorHandler("User not found.", 404));

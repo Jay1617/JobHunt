@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "../styles/OtpVerification.css";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { verifyOtp } from "../store/slices/userSlice";
@@ -10,8 +10,9 @@ const OtpVerification = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const email = location.state?.email; // Extract email from Register page
+  const { email } = useParams();
   const { isAuthenticated, loading } = useSelector((state) => state.user);
+  console.log("this is email: ", email);
 
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
 
@@ -42,7 +43,7 @@ const OtpVerification = () => {
     }
 
     dispatch(verifyOtp(email, enteredOtp)).then(() => {
-      navigate("/"); // Redirect after successful verification
+      navigate("/");
     });
   };
 
