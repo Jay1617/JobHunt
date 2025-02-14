@@ -6,19 +6,20 @@ const AboutUs = () => {
     {
       name: "Jay Thummar",
       role: "CEO & Founder",
-      image: "https://i.pravatar.cc/150?img=12",
+      image:
+        "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?t=st=1739549631~exp=1739553231~hmac=d8d11d6a4a140275932b57774e7b68eb6ecad73afc5a0ac2b48b71cbd2c8bf86&w=740",
       bio: "Visionary tech leader driving the future solutions.",
     },
     {
       name: "Vasu Tilva",
       role: "CTO",
-      image: "https://i.pravatar.cc/150?img=2",
+      image: "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?t=st=1739549631~exp=1739553231~hmac=d8d11d6a4a140275932b57774e7b68eb6ecad73afc5a0ac2b48b71cbd2c8bf86&w=740",
       bio: "Tech innovator with a passion for AI",
     },
     {
       name: "Meet Vekariya",
       role: "Head of Operations",
-      image: "https://i.pravatar.cc/150?img=6",
+      image: "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?t=st=1739549631~exp=1739553231~hmac=d8d11d6a4a140275932b57774e7b68eb6ecad73afc5a0ac2b48b71cbd2c8bf86&w=740",
       bio: "Operations expert focused on client success",
     },
   ];

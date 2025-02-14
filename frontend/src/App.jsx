@@ -44,7 +44,7 @@ const App = () => {
 
   useEffect(() => {
     dispatch(getUser());
-  }, [dispatch]);
+  }, [dispatch, isAuthenticated]);
 
   if (loading) {
     return (

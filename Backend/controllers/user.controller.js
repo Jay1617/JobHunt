@@ -110,12 +110,12 @@ export const register = catchAsyncErrors(async (req, res, next) => {
     };
     if (req.files && req.files.resume) {
       const { resume } = req.files;
-      console.log(resume);
+      // console.log(resume);
 
       if (resume) {
         try {
           // Log file details
-          console.log(resume);
+          // console.log(resume);
           console.log("Uploading to Cloudinary...");
 
           // Upload the file
@@ -202,8 +202,8 @@ const generateEmailTemplate = (verificationCode) => {
 export const verifyAccount = catchAsyncErrors(async (req, res, next) => {
   const { email, verificationCode } = req.body;
 
-  console.log("LLLLLLLL:");
-  console.log(req.body);
+  // console.log("LLLLLLLL:");
+  // console.log(req.body);
 
   try {
     const userAllEntries = await User.find({
@@ -226,7 +226,7 @@ export const verifyAccount = catchAsyncErrors(async (req, res, next) => {
         email,
         accountVerified: false,
       });
-      console.log("Older unverified users deleted.");
+      // console.log("Older unverified users deleted.");
     }
 
     // console.log("User to verify:", user);
@@ -238,7 +238,7 @@ export const verifyAccount = catchAsyncErrors(async (req, res, next) => {
       return next(new ErrorHandler("Invalid Verification Code.", 400));
     }
 
-    console.log("Verification Code Matched!");
+    // console.log("Verification Code Matched!");
 
     if (!user.verificationCodeExpires) {
       return next(new ErrorHandler("Verification Code Expired.", 400));

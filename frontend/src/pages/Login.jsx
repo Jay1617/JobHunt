@@ -32,7 +32,7 @@ const Login = () => {
       toast.error(error);
       dispatch(clearAllUserErrors());
     }
-    
+
     if (isAuthenticated && user) {
       toast.success("Login successful! 🎉");
 
