@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import {
@@ -8,97 +8,122 @@ import {
 } from "../store/slices/jobSlice";
 import { InfoIcon } from "lucide-react";
 
+const InputWrapper = React.memo(({ label, optional, children }) => (
+  <div className="form-group">
+    <div className="label-wrapper">
+      <label>{label}</label>
+      {optional && (
+        <span className="optional-tag">
+          <InfoIcon className="info-icon" />
+          Optional
+        </span>
+      )}
+    </div>
+    {children}
+  </div>
+));
+
 const JobPost = () => {
-  const [title, setTitle] = useState("");
-  const [jobType, setJobType] = useState("");
-  const [location, setLocation] = useState("");
-  const [companyName, setCompanyName] = useState("");
-  const [introduction, setIntroduction] = useState("");
-  const [responsibilities, setResponsibilities] = useState("");
-  const [qualifications, setQualifications] = useState("");
-  const [offers, setOffers] = useState("");
-  const [jobNiche, setJobNiche] = useState("");
-  const [salary, setSalary] = useState("");
-  const [hiringMultipleCandidates, setHiringMultipleCandidates] = useState("");
-  const [personalWebsiteTitle, setPersonalWebsiteTitle] = useState("");
-  const [personalWebsiteUrl, setPersonalWebsiteUrl] = useState("");
+  const [formData, setFormData] = useState({
+    title: "",
+    jobType: "",
+    location: "",
+    companyName: "",
+    introduction: "",
+    responsibilities: "",
+    qualifications: "",
+    offers: "",
+    jobNiche: "",
+    salary: "",
+    hiringMultipleCandidates: "",
+    personalWebsiteTitle: "",
+    personalWebsiteUrl: "",
+  });
 
-  const nichesArray = [
-    "Software Development",
-    "Web Development",
-    "Cybersecurity",
-    "Data Science",
-    "Artificial Intelligence",
-    "Cloud Computing",
-    "DevOps",
-    "Mobile App Development",
-    "Blockchain",
-    "Database Administration",
-    "Network Administration",
-    "UI/UX Design",
-    "Game Development",
-    "IoT (Internet of Things)",
-    "Big Data",
-    "Machine Learning",
-    "IT Project Management",
-    "IT Support and Helpdesk",
-    "Systems Administration",
-    "IT Consulting",
-    "Embedded Systems",
-    "Robotic Process Automation (RPA)",
-    "Augmented Reality (AR) & Virtual Reality (VR)",
-    "Business Intelligence & Analytics",
-    "IT Governance & Compliance",
-  ];
+  const nichesArray = useMemo(
+    () => [
+      "Software Development",
+      "Web Development",
+      "Cybersecurity",
+      "Data Science",
+      "Artificial Intelligence",
+      "Cloud Computing",
+      "DevOps",
+      "Mobile App Development",
+      "Blockchain",
+      "Database Administration",
+      "Network Administration",
+      "UI/UX Design",
+      "Game Development",
+      "IoT (Internet of Things)",
+      "Big Data",
+      "Machine Learning",
+      "IT Project Management",
+      "IT Support and Helpdesk",
+      "Systems Administration",
+      "IT Consulting",
+      "Embedded Systems",
+      "Robotic Process Automation (RPA)",
+      "Augmented Reality (AR) & Virtual Reality (VR)",
+      "Business Intelligence & Analytics",
+      "IT Governance & Compliance",
+    ],
+    []
+  );
 
-  const cities = [
-    "Bangalore",
-    "Hyderabad",
-    "Pune",
-    "Chennai",
-    "Mumbai",
-    "Delhi",
-    "Noida",
-    "Gurgaon",
-    "Kolkata",
-    "Ahmedabad",
-    "Jaipur",
-    "Indore",
-    "Chandigarh",
-    "Kochi",
-    "Bhubaneswar",
-    "Visakhapatnam",
-    "Nagpur",
-    "Coimbatore",
-    "Lucknow",
-    "Mysore",
-  ];
+  const cities = useMemo(
+    () => [
+      "Bangalore",
+      "Hyderabad",
+      "Pune",
+      "Chennai",
+      "Mumbai",
+      "Delhi",
+      "Noida",
+      "Gurgaon",
+      "Kolkata",
+      "Ahmedabad",
+      "Jaipur",
+      "Indore",
+      "Chandigarh",
+      "Kochi",
+      "Bhubaneswar",
+      "Visakhapatnam",
+      "Nagpur",
+      "Coimbatore",
+      "Lucknow",
+      "Mysore",
+    ],
+    []
+  );
 
   const { isAuthenticated, user } = useSelector((state) => state.user);
   const { loading, error, message } = useSelector((state) => state.jobs);
   const dispatch = useDispatch();
 
-  const handlePostJob = (e) => {
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("jobType", jobType);
-    formData.append("location", location);
-    formData.append("companyName", companyName);
-    formData.append("introduction", introduction);
-    formData.append("responsibilities", responsibilities);
-    formData.append("qualifications", qualifications);
-    offers && formData.append("offers", offers);
-    formData.append("jobNiche", jobNiche);
-    formData.append("salary", salary);
-    hiringMultipleCandidates &&
-      formData.append("hiringMultipleCandidates", hiringMultipleCandidates);
-    personalWebsiteTitle &&
-      formData.append("personalWebsiteTitle", personalWebsiteTitle);
-    personalWebsiteUrl &&
-      formData.append("personalWebsiteUrl", personalWebsiteUrl);
+  const handleInputChange = useCallback(
+    (field) => (e) => {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: e.target.value,
+      }));
+    },
+    []
+  );
 
-    dispatch(postJob(formData));
-  };
+  const handleSubmit = useCallback(
+    (e) => {
+      e.preventDefault();
+      const form = new FormData();
+
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value) form.append(key, value);
+      });
+
+      dispatch(postJob(form));
+    },
+    [formData, dispatch]
+  );
 
   useEffect(() => {
     if (error) {
@@ -109,34 +134,19 @@ const JobPost = () => {
       toast.success(message);
       dispatch(resetJobSlice());
     }
-  }, [dispatch, error, loading, message]);
-
-  const InputWrapper = ({ label, optional, children }) => (
-    <div className="form-group">
-      <div className="label-wrapper">
-        <label>{label}</label>
-        {optional && (
-          <span className="optional-tag">
-            <InfoIcon className="info-icon" />
-            Optional
-          </span>
-        )}
-      </div>
-      {children}
-    </div>
-  );
+  }, [dispatch, error, message]);
 
   return (
     <div className="job-post-container">
       <div className="job-post-card">
         <h1 className="form-title">Post A New Job</h1>
 
-        <div className="form-content">
+        <form onSubmit={handleSubmit} className="form-content">
           <InputWrapper label="Job Title">
             <input
               type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              value={formData.title}
+              onChange={handleInputChange("title")}
               placeholder="Enter job title"
               className="form-input"
             />
@@ -145,8 +155,8 @@ const JobPost = () => {
           <div className="form-grid">
             <InputWrapper label="Job Type">
               <select
-                value={jobType}
-                onChange={(e) => setJobType(e.target.value)}
+                value={formData.jobType}
+                onChange={handleInputChange("jobType")}
                 className="form-select"
               >
                 <option value="">Select Job Type</option>
@@ -157,8 +167,8 @@ const JobPost = () => {
 
             <InputWrapper label="Location">
               <select
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
+                value={formData.location}
+                onChange={handleInputChange("location")}
                 className="form-select"
               >
                 <option value="">Select City</option>
@@ -174,8 +184,8 @@ const JobPost = () => {
           <InputWrapper label="Company Name">
             <input
               type="text"
-              value={companyName}
-              onChange={(e) => setCompanyName(e.target.value)}
+              value={formData.companyName}
+              onChange={handleInputChange("companyName")}
               placeholder="Enter company name"
               className="form-input"
             />
@@ -183,8 +193,8 @@ const JobPost = () => {
 
           <InputWrapper label="Company/Job Introduction">
             <textarea
-              value={introduction}
-              onChange={(e) => setIntroduction(e.target.value)}
+              value={formData.introduction}
+              onChange={handleInputChange("introduction")}
               placeholder="Describe the company and job role"
               rows={5}
               className="form-textarea"
@@ -193,8 +203,8 @@ const JobPost = () => {
 
           <InputWrapper label="Responsibilities">
             <textarea
-              value={responsibilities}
-              onChange={(e) => setResponsibilities(e.target.value)}
+              value={formData.responsibilities}
+              onChange={handleInputChange("responsibilities")}
               placeholder="List the key responsibilities"
               rows={5}
               className="form-textarea"
@@ -203,8 +213,8 @@ const JobPost = () => {
 
           <InputWrapper label="Qualifications">
             <textarea
-              value={qualifications}
-              onChange={(e) => setQualifications(e.target.value)}
+              value={formData.qualifications}
+              onChange={handleInputChange("qualifications")}
               placeholder="List required qualifications"
               rows={5}
               className="form-textarea"
@@ -213,8 +223,8 @@ const JobPost = () => {
 
           <InputWrapper label="What We Offer" optional>
             <textarea
-              value={offers}
-              onChange={(e) => setOffers(e.target.value)}
+              value={formData.offers}
+              onChange={handleInputChange("offers")}
               placeholder="Describe the benefits and perks"
               rows={5}
               className="form-textarea"
@@ -224,8 +234,8 @@ const JobPost = () => {
           <div className="form-grid">
             <InputWrapper label="Job Niche">
               <select
-                value={jobNiche}
-                onChange={(e) => setJobNiche(e.target.value)}
+                value={formData.jobNiche}
+                onChange={handleInputChange("jobNiche")}
                 className="form-select"
               >
                 <option value="">Select Job Niche</option>
@@ -240,8 +250,8 @@ const JobPost = () => {
             <InputWrapper label="Salary Range">
               <input
                 type="text"
-                value={salary}
-                onChange={(e) => setSalary(e.target.value)}
+                value={formData.salary}
+                onChange={handleInputChange("salary")}
                 placeholder="e.g. 50,000 - 80,000"
                 className="form-input"
               />
@@ -250,8 +260,8 @@ const JobPost = () => {
 
           <InputWrapper label="Hiring Multiple Candidates?" optional>
             <select
-              value={hiringMultipleCandidates}
-              onChange={(e) => setHiringMultipleCandidates(e.target.value)}
+              value={formData.hiringMultipleCandidates}
+              onChange={handleInputChange("hiringMultipleCandidates")}
               className="form-select"
             >
               <option value="">Select Option</option>
@@ -264,8 +274,8 @@ const JobPost = () => {
             <InputWrapper label="Personal Website Name" optional>
               <input
                 type="text"
-                value={personalWebsiteTitle}
-                onChange={(e) => setPersonalWebsiteTitle(e.target.value)}
+                value={formData.personalWebsiteTitle}
+                onChange={handleInputChange("personalWebsiteTitle")}
                 placeholder="Enter website name"
                 className="form-input"
               />
@@ -274,8 +284,8 @@ const JobPost = () => {
             <InputWrapper label="Personal Website URL" optional>
               <input
                 type="text"
-                value={personalWebsiteUrl}
-                onChange={(e) => setPersonalWebsiteUrl(e.target.value)}
+                value={formData.personalWebsiteUrl}
+                onChange={handleInputChange("personalWebsiteUrl")}
                 placeholder="Enter website URL"
                 className="form-input"
               />
@@ -283,15 +293,11 @@ const JobPost = () => {
           </div>
 
           <div className="button-container">
-            <button
-              onClick={handlePostJob}
-              disabled={loading}
-              className="submit-button"
-            >
+            <button type="submit" disabled={loading} className="submit-button">
               {loading ? "Posting..." : "Post Job"}
             </button>
           </div>
-        </div>
+        </form>
       </div>
 
       <style jsx>{`
