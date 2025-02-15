@@ -106,7 +106,7 @@ export const register = (formData, navigateTo) => async (dispatch) => {
   dispatch(registerRequest());
   try {
     const email = formData.get("email");
-    
+
     const response = await axios.post(
       "http://localhost:5500/api/v1/user/register",
       formData,
@@ -117,13 +117,14 @@ export const register = (formData, navigateTo) => async (dispatch) => {
     );
 
     dispatch(registerSuccess(response.data));
-    await dispatch(getUser()).unwrap();
-    
+
+    await dispatch(getUser());
+
     navigateTo(`/verify-otp/${email}`, {
       state: { email: email },
     });
   } catch (error) {
-    dispatch(registerFailed(error.response.data.message));
+    dispatch(registerFailed(error.response?.data?.message || "Registration failed"));
   }
 };
 
@@ -179,11 +180,10 @@ export const getUser = () => async (dispatch) => {
         withCredentials: true,
       }
     );
-    // console.log("datttttt: ",response.data.user);
 
     dispatch(userSlice.actions.fetchUserSuccess(response.data.user));
   } catch (error) {
-    dispatch(userSlice.actions.fetchUserFailed(error.response.data.message));
+    dispatch(userSlice.actions.fetchUserFailed(error.response?.data?.message || "User fetch failed"));
   }
 };
 
