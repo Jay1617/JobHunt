@@ -11,7 +11,9 @@ import UpdatePassword from "../components/UpdatePassword";
 import MyJobs from "../components/MyJobs";
 import JobPost from "../components/JobPost";
 import Applications from "../components/Applications";
+import Analysis from './Analysis';
 import MyApplications from "../components/MyApplications";
+
 
 const NavButton = ({ active, icon: Icon, children, onClick, variant = "default" }) => {
   const baseClasses = "w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left transition-all duration-200 cursor-pointer";
@@ -73,6 +75,8 @@ const Dashboard = () => {
         return <Applications />;
       case "My Applications":
         return <MyApplications />;
+      case "Analysis":
+        return <Analysis  />;
       default:
         return <MyProfile />;
     }
@@ -163,6 +167,13 @@ const Dashboard = () => {
                       onClick={() => setComponentName("Applications")}
                     >
                       Applications
+                    </NavButton>
+                    <NavButton
+                      active={componentName === "Analysis"}
+                      icon={FaClipboard}
+                      onClick={() => setComponentName("Analysis")}
+                    >
+                      Analysis 
                     </NavButton>
                   </>
                 )}

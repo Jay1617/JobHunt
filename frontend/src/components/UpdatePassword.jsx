@@ -27,7 +27,7 @@ const PasswordInput = ({ label, value, onChange, showPassword, togglePassword })
         type="button"
         onClick={togglePassword}
         className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-blue-500
-                 focus:outline-none transition-colors duration-200"
+                 focus:outline-none transition-colors duration-200 cursor-pointer"
       >
         {showPassword ? (
           <FaRegEyeSlash className="h-5 w-5 text-gray-400 hover:text-gray-600" />
@@ -38,7 +38,6 @@ const PasswordInput = ({ label, value, onChange, showPassword, togglePassword })
     </div>
   </div>
 );
-
 const UpdatePassword = () => {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
