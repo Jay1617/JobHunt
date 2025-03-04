@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import {
@@ -7,7 +7,14 @@ import {
   getMyJobs,
   resetJobSlice,
 } from "../store/slices/jobSlice";
-import { Trash2, Briefcase, MapPin, DollarSign, Calendar } from "lucide-react";
+import {
+  Trash2,
+  Briefcase,
+  MapPin,
+  DollarSign,
+  Calendar,
+  ChevronDown,
+} from "lucide-react";
 import LoadingSpinner from "../utils/LoadingSpinner";
 
 const MyJobs = () => {
@@ -15,6 +22,7 @@ const MyJobs = () => {
     (state) => state.jobs
   );
   const dispatch = useDispatch();
+  const [expandedJobId, setExpandedJobId] = useState(null); // Track which job's details are expanded
 
   useEffect(() => {
     if (error) {
@@ -30,6 +38,10 @@ const MyJobs = () => {
 
   const handleDeleteJob = (id) => {
     dispatch(deleteJob(id));
+  };
+
+  const toggleDetails = (id) => {
+    setExpandedJobId((prevId) => (prevId === id ? null : id)); // Toggle details visibility
   };
 
   if (loading) return <LoadingSpinner />;
@@ -134,15 +146,44 @@ const MyJobs = () => {
                 </div>
 
                 <div className="detail-tabs">
-                  <button className="tab active">Details</button>
+                  <button
+                    className="tab active"
+                    onClick={() => toggleDetails(job._id)} // Toggle details on click
+                  >
+                    Details
+                    <ChevronDown
+                      size={16}
+                      className={`chevron ${
+                        expandedJobId === job._id ? "rotate" : ""
+                      }`}
+                    />
+                  </button>
                   <button className="tab">Applicants</button>
                   <button className="tab">Analytics</button>
                 </div>
 
-                <div className="action-buttons">
+                {/* Expanded Details Section */}
+                {expandedJobId === job._id && (
+                  <div className="expanded-details">
+                    <div className="detail-section">
+                      <h4>Full Description</h4>
+                      <p>{job.introduction}</p>
+                    </div>
+                    <div className="detail-section">
+                      <h4>Requirements</h4>
+                      <p>{job.requirements}</p>
+                    </div>
+                    <div className="detail-section">
+                      <h4>Responsibilities</h4>
+                      <p>{job.responsibilities}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* <div className="action-buttons">
                   <button className="action-btn edit">Edit Job</button>
                   <button className="action-btn view">View Job</button>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
@@ -421,6 +462,9 @@ const MyJobs = () => {
           border-bottom: 2px solid transparent;
           font-weight: 500;
           transition: all 0.2s ease;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
         }
 
         .tab.active {
@@ -431,6 +475,22 @@ const MyJobs = () => {
         .tab:hover:not(.active) {
           color: #4b5563;
           border-bottom-color: #e5e7eb;
+        }
+
+        .chevron {
+          transition: transform 0.2s ease;
+        }
+
+        .chevron.rotate {
+          transform: rotate(180deg);
+        }
+
+        .expanded-details {
+          margin-top: 1rem;
+          padding: 1rem;
+          background: #f9fafb;
+          border-radius: 8px;
+          border: 1px solid #e5e7eb;
         }
 
         .action-buttons {

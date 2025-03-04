@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { FaUser, FaEdit, FaLock, FaBriefcase, FaClipboard, FaSignOutAlt, FaBars, FaTimes } from 'react-icons/fa';
-import { RiFileEditLine, RiDashboardLine } from 'react-icons/ri';
+import { RiFileEditLine, RiDashboardLine, RiLineChartLine } from 'react-icons/ri';
 import { logout, clearAllUserErrors } from '../store/slices/userSlice';
 import { toast } from 'react-toastify';
 import MyProfile from "../components/MyProfile";
@@ -16,12 +16,12 @@ import MyApplications from "../components/MyApplications";
 
 
 const NavButton = ({ active, icon: Icon, children, onClick, variant = "default" }) => {
-  const baseClasses = "w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left transition-all duration-200 cursor-pointer";
+  const baseClasses = "w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 cursor-pointer";
   const variants = {
     default: active
-      ? "bg-blue-600 text-white hover:bg-blue-700"
-      : "text-gray-600 hover:bg-blue-50 hover:text-blue-600",
-    danger: "text-red-600 hover:bg-red-50"
+      ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+      : "text-gray-700 hover:bg-blue-50 hover:text-blue-600 hover:shadow",
+    danger: "text-red-600 hover:bg-red-50 hover:shadow"
   };
 
   return (
@@ -29,8 +29,8 @@ const NavButton = ({ active, icon: Icon, children, onClick, variant = "default" 
       onClick={onClick}
       className={`${baseClasses} ${variants[variant]}`}
     >
-      <Icon className="w-5 h-5" />
-      <span className="font-medium">{children}</span>
+      <Icon className={`w-5 h-5 ${active ? 'text-white' : ''}`} />
+      <span className={`font-medium ${active ? 'text-white' : ''}`}>{children}</span>
     </button>
   );
 };
@@ -85,18 +85,22 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-              <p className="mt-2 text-blue-100">
-                Welcome back, <span className="font-semibold text-white">{user?.name}</span>
+            <div className="animate-fadeIn">
+              <h1 className="text-3xl font-bold tracking-tight flex items-center">
+                <RiDashboardLine className="mr-3 h-8 w-8" />
+                Employer Dashboard
+              </h1>
+              <p className="mt-2 text-blue-100 flex items-center">
+                <FaUser className="mr-2 h-4 w-4" />
+                Welcome back, <span className="font-semibold text-white ml-1 underline decoration-2 decoration-blue-300">{user?.name}</span>
               </p>
             </div>
             <button
               onClick={() => setShowSidebar(!showSidebar)}
-              className="md:hidden inline-flex items-center justify-center p-2 rounded-lg bg-blue-700 hover:bg-blue-800 transition-colors"
+              className="md:hidden inline-flex items-center justify-center p-2 rounded-lg bg-blue-700 hover:bg-blue-800 transition-colors shadow-md focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50"
             >
               {showSidebar ? (
                 <FaTimes className="w-6 h-6" />
@@ -116,12 +120,29 @@ const Dashboard = () => {
             className={`
               fixed md:relative inset-y-0 left-0 z-30
               transform md:transform-none transition-transform duration-300 ease-in-out
-              w-64 bg-white shadow-lg md:shadow-md rounded-r-lg md:rounded-lg
+              w-72 bg-white shadow-xl md:shadow-lg rounded-r-xl md:rounded-xl
               ${showSidebar ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+              border-r md:border-r-0 border-gray-100
             `}
           >
             <div className="h-full p-6 flex flex-col">
-              <div className="space-y-1">
+              <div className="mb-6 pb-4 border-b border-gray-200">
+                <div className="flex items-center justify-center mb-4">
+                  <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center shadow-lg">
+                    <span className="text-white text-xl font-bold">
+                      {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                    </span>
+                  </div>
+                </div>
+                <h2 className="text-center text-lg font-semibold text-gray-800">
+                  {user?.role}
+                </h2>
+              </div>
+              
+              <div className="space-y-2 mb-auto">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 pl-4">
+                  Account
+                </p>
                 <NavButton
                   active={componentName === "My Profile"}
                   icon={FaUser}
@@ -147,6 +168,9 @@ const Dashboard = () => {
                 {user?.role === "Employer" && (
                   <>
                     <div className="my-4 border-t border-gray-200" />
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 pl-4">
+                      Job Management
+                    </p>
                     <NavButton
                       active={componentName === "Job Post"}
                       icon={FaBriefcase}
@@ -170,10 +194,10 @@ const Dashboard = () => {
                     </NavButton>
                     <NavButton
                       active={componentName === "Analysis"}
-                      icon={FaClipboard}
+                      icon={RiLineChartLine}
                       onClick={() => setComponentName("Analysis")}
                     >
-                      Analysis 
+                      Match With AI
                     </NavButton>
                   </>
                 )}
@@ -181,6 +205,9 @@ const Dashboard = () => {
                 {user?.role === "Job Seeker" && (
                   <>
                     <div className="my-4 border-t border-gray-200" />
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 pl-4">
+                      Applications
+                    </p>
                     <NavButton
                       active={componentName === "My Applications"}
                       icon={FaClipboard}
@@ -190,8 +217,9 @@ const Dashboard = () => {
                     </NavButton>
                   </>
                 )}
+              </div>
 
-                <div className="my-4 border-t border-gray-200" />
+              <div className="mt-6 pt-4 border-t border-gray-200">
                 <NavButton
                   icon={FaSignOutAlt}
                   onClick={handleLogout}
@@ -204,9 +232,15 @@ const Dashboard = () => {
           </div>
 
           {/* Main Content Area */}
-          <div className="flex-1 bg-white shadow-md rounded-lg p-6">
-            <div className="max-w-4xl mx-auto">
-              {renderComponent()}
+          <div className="flex-1">
+            <div className="bg-white shadow-lg rounded-xl p-6 transition-all duration-300 hover:shadow-xl border border-gray-100">
+              <div className="mb-4 pb-4 border-b border-gray-100">
+                <h2 className="text-2xl font-bold text-gray-800">{componentName}</h2>
+                <p className="text-sm text-gray-500">Manage your {componentName.toLowerCase()} settings and information</p>
+              </div>
+              <div className="max-w-4xl mx-auto">
+                {renderComponent()}
+              </div>
             </div>
           </div>
         </div>
@@ -215,7 +249,7 @@ const Dashboard = () => {
       {/* Mobile Overlay */}
       {showSidebar && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden"
+          className="fixed inset-0 bg-black bg-opacity-60 z-20 md:hidden backdrop-blur-sm transition-all duration-300"
           onClick={() => setShowSidebar(false)}
         />
       )}
