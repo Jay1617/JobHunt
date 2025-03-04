@@ -14,6 +14,8 @@ import RankingModal from "../components/RankingModal";
 
 const Analysis = ({ jobId }) => {
   const { myJobs } = useSelector((state) => state.jobs);
+  console.log(myJobs);
+  
   const [filteredJobs, setFilteredJobs] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("all");

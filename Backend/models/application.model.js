@@ -70,6 +70,10 @@ const applicationSchema = new mongoose.Schema({
       default: false,
     },
   },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 export const Application = mongoose.model("Application", applicationSchema);
