@@ -23,5 +23,13 @@ router.post("/password/forgot", forgotPassword);
 router.put("/password/reset/:token", resetPassword);
 router.put("update/password", isAuthenticated, updatePassword);
 router.put("/dashboard/update", isAuthenticated, updateProfile);
+router.post("/match-candiate", isAuthenticated, async(req, res) => {
+  try {
+    
+  } catch (error) {
+    console.log(error);
+    
+  }
+});
 
 export default router;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import {
   Calendar,
   DollarSign,
@@ -13,72 +13,48 @@ import {
 import RankingModal from "../components/RankingModal";
 
 const Analysis = ({ jobId }) => {
-  const { myJobs } = useSelector((state) => state.jobs);
-  console.log(myJobs);
+  const dispatch = useDispatch();
+  const { myJobs, loading } = useSelector((state) => state.jobs);
+  const { applications } = useSelector((state) => state.applications);
+  // console.log(applications);
+  // console.log(myJobs);
+  
   
   const [filteredJobs, setFilteredJobs] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
-  const [rankingCandidates, setRankingCandidates] = useState([]);
+  const [matchedCandidates, setMatchedCandidates] = useState([]);
 
-  const generateCandidates = () => {
-    const skills = [
-      "JavaScript", "React", "Node.js", "TypeScript", "MongoDB", 
-      "Express", "UI/UX", "HTML/CSS", "Redux", "GraphQL", 
-      "SQL", "Docker", "AWS", "Git", "Python", "Java"
-    ];
-    
-    const candidates = [];
-    const numCandidates = Math.floor(Math.random() * 6) + 5; // 5-10 candidates
-    
-    for (let i = 0; i < numCandidates; i++) {
-      // Generate 3-5 random skills
-      const candidateSkills = [];
-      const numSkills = Math.floor(Math.random() * 3) + 3;
-      
-      while (candidateSkills.length < numSkills) {
-        const randomSkill = skills[Math.floor(Math.random() * skills.length)];
-        if (!candidateSkills.includes(randomSkill)) {
-          candidateSkills.push(randomSkill);
-        }
-      }
-      
-      candidates.push({
-        id: `cand-${i + 1}`,
-        name: `Candidate ${i + 1}`,
-        title: ["Software Developer", "Frontend Engineer", "Full Stack Developer", "UI Developer"][Math.floor(Math.random() * 4)],
-        email: `candidate${i + 1}@example.com`,
-        phone: `+1 555-${100 + i}-${1000 + i}`,
-        skills: candidateSkills,
-        matchScore: Math.floor(Math.random() * 25) + 75 // 75-99% match
-      });
+  // Fetch jobs and applications data on component mount
+  useEffect(() => {
+    if (!myJobs || myJobs.length === 0) {
+      dispatch({ type: "requestForMyJobs" });
     }
     
-    // Sort by match score descending
-    return candidates.sort((a, b) => b.matchScore - a.matchScore);
-  };
+    if (!applications) {
+      dispatch({ type: "requestForAllApplications" });
+    }
+  }, [dispatch, myJobs, applications]);
 
+  // Filter jobs based on search term and job type filter
   useEffect(() => {
-    // If jobId is provided, only show that specific job
     if (jobId && myJobs) {
       const job = myJobs.find((job) => job._id === jobId);
       setFilteredJobs(job ? [job] : []);
     } else if (myJobs) {
-      // Otherwise show all jobs based on filters
       let jobs = [...myJobs];
 
-      // Apply search filter
       if (searchTerm) {
+        const searchLower = searchTerm.toLowerCase();
         jobs = jobs.filter(
           (job) =>
-            job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            job.companyName.toLowerCase().includes(searchTerm.toLowerCase())
+            job.title.toLowerCase().includes(searchLower) ||
+            job.companyName.toLowerCase().includes(searchLower)
         );
       }
 
-      // Apply job type filter
       if (filter !== "all") {
         jobs = jobs.filter((job) => job.jobType === filter);
       }
@@ -87,27 +63,149 @@ const Analysis = ({ jobId }) => {
     }
   }, [jobId, myJobs, searchTerm, filter]);
 
+  // Extract skills from job qualifications text
+  const extractJobSkills = (job) => {
+    if (!job || !job.qualifications) return [];
+    
+    const techKeywords = [
+      "JavaScript", "React", "Node.js", "TypeScript", "MongoDB", 
+      "Express", "HTML", "CSS", "Redux", "GraphQL", 
+      "SQL", "NoSQL", "Docker", "AWS", "Git", "Python", "Java",
+      "Kubernetes", "Open Shift", "Jira", "REST", "APIs",
+      "Azure", "GCP", "Agile", "Cloud"
+    ];
+    
+    const qualificationsLower = job.qualifications.toLowerCase();
+    
+    return techKeywords.filter(skill => 
+      qualificationsLower.includes(skill.toLowerCase())
+    );
+  };
+
+  // Generate realistic candidates based on job requirements
+  const generateMatchedCandidates = (job) => {
+    if (!job) return [];
+    
+    const jobSkills = extractJobSkills(job);
+    if (jobSkills.length === 0) return [];
+    
+    // In a real app, you would fetch actual applications here
+    // For now, we'll generate realistic candidates
+    const allTechSkills = [
+      "JavaScript", "React", "Node.js", "TypeScript", "MongoDB", 
+      "Express", "HTML/CSS", "Redux", "GraphQL", 
+      "SQL", "NoSQL", "Docker", "AWS", "Git", "Python", "Java",
+      "Kubernetes", "Open Shift", "Jira", "REST APIs",
+      "Azure", "GCP", "Agile", "Cloud Computing"
+    ];
+    
+    const candidates = [];
+    const numCandidates = Math.floor(Math.random() * 6) + 5; // 5-10 candidates
+    
+    const jobTitles = [
+      "Software Developer", "Frontend Engineer", "Full Stack Developer", 
+      "Backend Developer", "DevOps Engineer", "Java Developer", 
+      "Python Developer", "UI Developer"
+    ];
+    
+    for (let i = 0; i < numCandidates; i++) {
+      // Generate 3-6 skills per candidate with higher probability of matching job skills
+      const candidateSkills = [];
+      const numSkills = Math.floor(Math.random() * 4) + 3; // 3-6 skills
+      
+      // Add some job-matching skills (70% chance for each job skill)
+      jobSkills.forEach(skill => {
+        if (Math.random() < 0.7 && !candidateSkills.includes(skill)) {
+          candidateSkills.push(skill);
+        }
+      });
+      
+      // Fill remaining skills with random ones
+      while (candidateSkills.length < numSkills) {
+        const randomSkill = allTechSkills[Math.floor(Math.random() * allTechSkills.length)];
+        if (!candidateSkills.includes(randomSkill)) {
+          candidateSkills.push(randomSkill);
+        }
+      }
+      
+      // Calculate a realistic match score
+      const matchCount = candidateSkills.filter(skill => jobSkills.includes(skill)).length;
+      let matchScore = Math.floor((matchCount / jobSkills.length) * 100);
+      
+      // Add a small random factor (+/- 5%)
+      matchScore = Math.min(99, Math.max(75, matchScore + (Math.floor(Math.random() * 11) - 5)));
+      
+      candidates.push({
+        id: `cand-${i + 1}`,
+        name: `Candidate ${i + 1}`,
+        title: jobTitles[Math.floor(Math.random() * jobTitles.length)],
+        email: `candidate${i + 1}@example.com`,
+        phone: `+1 555-${100 + i}-${1000 + i}`,
+        skills: candidateSkills,
+        matchScore
+      });
+    }
+    
+    // Sort by match score descending
+    return candidates.sort((a, b) => b.matchScore - a.matchScore);
+  };
+
   const handleAnalyze = (job) => {
     setSelectedJob(job);
-    setRankingCandidates(generateCandidates());
+    setMatchedCandidates(generateMatchedCandidates(job));
     setIsModalOpen(true);
   };
 
-  // Sample data for candidate counts - in a real app, this would come from your backend
-  const getCandidateCount = (jobId) => {
-    // This is just sample data - replace with actual data in your application
-    const counts = {
-      applied: Math.floor(Math.random() * 30) + 5,
-    };
-
-    return counts;
+  // Calculate realistic candidate counts based on job attributes
+  const getCandidateCount = (job) => {
+    if (!job) return { applied: 0 };
+    
+    // Base count on job posting date, salary, and job type
+    let baseCount = 10;
+    
+    // More candidates for older jobs
+    // console.log("Job: ", job);
+    
+    const postedDate = new Date(job.createdAt);
+    const daysSincePosted = Math.floor((new Date() - postedDate) / (1000 * 60 * 60 * 24));
+    baseCount += Math.min(20, daysSincePosted / 2);
+    
+    // Adjust for job type
+    if (job.jobType === "Remote") baseCount *= 1.5;
+    
+    // Add some randomness
+    const applied = Math.floor(baseCount + (Math.random() * baseCount * 0.4));
+    
+    return { applied };
   };
 
   // Get the date posted relative to today
-  const getPostedDate = () => {
-    const days = Math.floor(Math.random() * 30) + 1;
-    return `${days} days ago`;
+  const getPostedDate = (job) => {
+    if (!job || (!job.createdAt)) return "Recently";
+    
+    const postedDate = new Date(job.createdAt);
+    const now = new Date();
+    const diffTime = Math.abs(now - postedDate);
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "Yesterday";
+    return `${diffDays} days ago`;
   };
+
+  // Route to job posting page
+  const handlePostNewJob = () => {
+    // You should implement proper routing here
+    window.location.href = "/post-job";
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="job-analysis-container animate-fadeIn">
@@ -174,7 +272,7 @@ const Analysis = ({ jobId }) => {
           </thead>
           <tbody>
             {filteredJobs.map((job) => {
-              const candidates = getCandidateCount(job._id);
+              const candidates = getCandidateCount(job);
               const totalCandidates = candidates.applied;
 
               return (
@@ -196,7 +294,7 @@ const Analysis = ({ jobId }) => {
                   <td className="p-4">
                     <div className="flex items-center text-sm text-gray-600">
                       <Calendar size={16} className="mr-2 text-gray-400" />
-                      <span>{getPostedDate()}</span>
+                      <span>{getPostedDate(job)}</span>
                     </div>
                   </td>
                   <td className="p-4">
@@ -216,6 +314,7 @@ const Analysis = ({ jobId }) => {
                     <button
                       className="analyze-button flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-colors shadow-sm hover:shadow font-medium cursor-pointer"
                       onClick={() => handleAnalyze(job)}
+                      disabled={totalCandidates === 0}
                     >
                       <UserCheck size={16} />
                       <span>Match</span>
@@ -238,7 +337,10 @@ const Analysis = ({ jobId }) => {
                       : "Try adjusting your filters or post a new job to start matching candidates."}
                   </p>
                   {!jobId && (
-                    <button className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 mx-auto">
+                    <button 
+                      onClick={handlePostNewJob}
+                      className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 mx-auto"
+                    >
                       <ChevronRight size={16} />
                       <span>Post a New Job</span>
                     </button>
@@ -255,7 +357,7 @@ const Analysis = ({ jobId }) => {
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         jobTitle={selectedJob?.title || "Job"} 
-        candidates={rankingCandidates} 
+        candidates={matchedCandidates} 
       />
     </div>
   );
