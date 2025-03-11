@@ -56,12 +56,14 @@ const CandidateCard = ({ candidate, rank }) => {
 };
 
 const RankingModal = ({ isOpen, onClose, jobTitle, candidates }) => {
+  // console.log('Candidates:', candidates);
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div
-        className="absolute inset-0 bg-black bg-opacity-60 backdrop-blur-sm"
+        className="absolute inset-0 bg-transparent backdrop-blur-sm"
         onClick={onClose}
       ></div>
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[85vh] overflow-hidden z-10 relative">
