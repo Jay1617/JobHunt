@@ -11,15 +11,13 @@ import {
   ChevronRight,
 } from "lucide-react";
 import RankingModal from "../components/RankingModal";
+import JobPost from "../components/JobPost";
 
 const Analysis = ({ jobId }) => {
   const dispatch = useDispatch();
   const { myJobs, loading } = useSelector((state) => state.jobs);
   const { applications } = useSelector((state) => state.applications);
-  // console.log(applications);
-  // console.log(myJobs);
-  
-  
+
   const [filteredJobs, setFilteredJobs] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("all");
@@ -32,7 +30,7 @@ const Analysis = ({ jobId }) => {
     if (!myJobs || myJobs.length === 0) {
       dispatch({ type: "requestForMyJobs" });
     }
-    
+
     if (!applications) {
       dispatch({ type: "requestForAllApplications" });
     }
@@ -66,75 +64,251 @@ const Analysis = ({ jobId }) => {
   // Extract skills from job qualifications text
   const extractJobSkills = (job) => {
     if (!job || !job.qualifications) return [];
-    
+
     const techKeywords = [
-      "JavaScript", "React", "Node.js", "TypeScript", "MongoDB", 
-      "Express", "HTML", "CSS", "Redux", "GraphQL", 
-      "SQL", "NoSQL", "Docker", "AWS", "Git", "Python", "Java",
-      "Kubernetes", "Open Shift", "Jira", "REST", "APIs",
-      "Azure", "GCP", "Agile", "Cloud"
+      "JavaScript",
+      "React",
+      "Node.js",
+      "TypeScript",
+      "MongoDB",
+      "Express",
+      "HTML",
+      "CSS",
+      "Redux",
+      "GraphQL",
+      "SQL",
+      "NoSQL",
+      "Docker",
+      "AWS",
+      "Git",
+      "Python",
+      "Java",
+      "Kubernetes",
+      "Open Shift",
+      "Jira",
+      "REST",
+      "APIs",
+      "Azure",
+      "GCP",
+      "Agile",
+      "Cloud",
     ];
-    
+
     const qualificationsLower = job.qualifications.toLowerCase();
-    
-    return techKeywords.filter(skill => 
+
+    return techKeywords.filter((skill) =>
       qualificationsLower.includes(skill.toLowerCase())
     );
   };
 
+  // Get job-specific applications
+  const getJobApplications = (jobId) => {
+    if (!applications || !jobId) return [];
+
+    return applications.filter((app) => {
+      return (
+        app.jobInfo &&
+        app.jobInfo.jobId &&
+        app.jobInfo.jobId.toString() === jobId.toString()
+      );
+    });
+  };
+
+  // Transform application data to candidate format
+  const transformApplicationsToCandidates = (applications, job) => {
+    if (!applications || applications.length === 0 || !job) return [];
+
+    const jobSkills = extractJobSkills(job);
+
+    return applications.map((app, index) => {
+      // Generate random skills for each candidate (in a real app, this would come from their resume)
+      const candidateSkills = generateRandomSkills(jobSkills);
+
+      // Calculate match score based on skills
+      const matchScore = calculateMatchScore(candidateSkills, jobSkills);
+
+      return {
+        id: app._id || `app-${index}`,
+        name: app.jobSeekerInfo?.name || `Candidate ${index + 1}`,
+        title: app.jobInfo?.jobTitle || "Job Applicant",
+        email: app.jobSeekerInfo?.email || `candidate${index + 1}@example.com`,
+        phone: app.jobSeekerInfo?.phone || `Unknown`,
+        skills: candidateSkills,
+        matchScore,
+        actualApplication: app, // Store the original application data
+      };
+    });
+  };
+
+  // Helper function to generate random skills that favor matching job skills
+  const generateRandomSkills = (jobSkills) => {
+    const allTechSkills = [
+      "JavaScript",
+      "React",
+      "Node.js",
+      "TypeScript",
+      "MongoDB",
+      "Express",
+      "HTML/CSS",
+      "Redux",
+      "GraphQL",
+      "SQL",
+      "NoSQL",
+      "Docker",
+      "AWS",
+      "Git",
+      "Python",
+      "Java",
+      "Kubernetes",
+      "Open Shift",
+      "Jira",
+      "REST APIs",
+      "Azure",
+      "GCP",
+      "Agile",
+      "Cloud Computing",
+    ];
+
+    const candidateSkills = [];
+    const numSkills = Math.floor(Math.random() * 4) + 3; // 3-6 skills
+
+    // Add some job-matching skills (70% chance for each job skill)
+    jobSkills.forEach((skill) => {
+      if (Math.random() < 0.7 && !candidateSkills.includes(skill)) {
+        candidateSkills.push(skill);
+      }
+    });
+
+    // Fill remaining skills with random ones
+    while (candidateSkills.length < numSkills) {
+      const randomSkill =
+        allTechSkills[Math.floor(Math.random() * allTechSkills.length)];
+      if (!candidateSkills.includes(randomSkill)) {
+        candidateSkills.push(randomSkill);
+      }
+    }
+
+    return candidateSkills;
+  };
+
+  // Calculate match score based on skills overlap
+  const calculateMatchScore = (candidateSkills, jobSkills) => {
+    if (!jobSkills.length) return 80; // Default score if no job skills defined
+
+    const matchCount = candidateSkills.filter((skill) =>
+      jobSkills.includes(skill)
+    ).length;
+
+    let matchScore = Math.floor((matchCount / jobSkills.length) * 100);
+
+    // Add a small random factor (+/- 5%)
+    matchScore = Math.min(
+      99,
+      Math.max(75, matchScore + (Math.floor(Math.random() * 11) - 5))
+    );
+
+    return matchScore;
+  };
+
   // Generate realistic candidates based on job requirements
+  // Now we'll try to use actual applications first, then fall back to generated ones if needed
   const generateMatchedCandidates = (job) => {
     if (!job) return [];
-    
+
+    // Get actual applications for this job
+    const jobApplications = getJobApplications(job._id);
+    console.log("Applications for this job:", jobApplications);
+
+    // If we have real applications, use them
+    if (jobApplications && jobApplications.length > 0) {
+      const realCandidates = transformApplicationsToCandidates(
+        jobApplications,
+        job
+      );
+
+      // Sort by match score descending
+      return realCandidates.sort((a, b) => b.matchScore - a.matchScore);
+    }
+
+    // Otherwise, fall back to generated candidates
     const jobSkills = extractJobSkills(job);
     if (jobSkills.length === 0) return [];
-    
-    // In a real app, you would fetch actual applications here
-    // For now, we'll generate realistic candidates
+
+    // For demo purposes, generate realistic candidates
     const allTechSkills = [
-      "JavaScript", "React", "Node.js", "TypeScript", "MongoDB", 
-      "Express", "HTML/CSS", "Redux", "GraphQL", 
-      "SQL", "NoSQL", "Docker", "AWS", "Git", "Python", "Java",
-      "Kubernetes", "Open Shift", "Jira", "REST APIs",
-      "Azure", "GCP", "Agile", "Cloud Computing"
+      "JavaScript",
+      "React",
+      "Node.js",
+      "TypeScript",
+      "MongoDB",
+      "Express",
+      "HTML/CSS",
+      "Redux",
+      "GraphQL",
+      "SQL",
+      "NoSQL",
+      "Docker",
+      "AWS",
+      "Git",
+      "Python",
+      "Java",
+      "Kubernetes",
+      "Open Shift",
+      "Jira",
+      "REST APIs",
+      "Azure",
+      "GCP",
+      "Agile",
+      "Cloud Computing",
     ];
-    
+
     const candidates = [];
     const numCandidates = Math.floor(Math.random() * 6) + 5; // 5-10 candidates
-    
+
     const jobTitles = [
-      "Software Developer", "Frontend Engineer", "Full Stack Developer", 
-      "Backend Developer", "DevOps Engineer", "Java Developer", 
-      "Python Developer", "UI Developer"
+      "Software Developer",
+      "Frontend Engineer",
+      "Full Stack Developer",
+      "Backend Developer",
+      "DevOps Engineer",
+      "Java Developer",
+      "Python Developer",
+      "UI Developer",
     ];
-    
+
     for (let i = 0; i < numCandidates; i++) {
       // Generate 3-6 skills per candidate with higher probability of matching job skills
       const candidateSkills = [];
       const numSkills = Math.floor(Math.random() * 4) + 3; // 3-6 skills
-      
+
       // Add some job-matching skills (70% chance for each job skill)
-      jobSkills.forEach(skill => {
+      jobSkills.forEach((skill) => {
         if (Math.random() < 0.7 && !candidateSkills.includes(skill)) {
           candidateSkills.push(skill);
         }
       });
-      
+
       // Fill remaining skills with random ones
       while (candidateSkills.length < numSkills) {
-        const randomSkill = allTechSkills[Math.floor(Math.random() * allTechSkills.length)];
+        const randomSkill =
+          allTechSkills[Math.floor(Math.random() * allTechSkills.length)];
         if (!candidateSkills.includes(randomSkill)) {
           candidateSkills.push(randomSkill);
         }
       }
-      
+
       // Calculate a realistic match score
-      const matchCount = candidateSkills.filter(skill => jobSkills.includes(skill)).length;
+      const matchCount = candidateSkills.filter((skill) =>
+        jobSkills.includes(skill)
+      ).length;
       let matchScore = Math.floor((matchCount / jobSkills.length) * 100);
-      
+
       // Add a small random factor (+/- 5%)
-      matchScore = Math.min(99, Math.max(75, matchScore + (Math.floor(Math.random() * 11) - 5)));
-      
+      matchScore = Math.min(
+        99,
+        Math.max(75, matchScore + (Math.floor(Math.random() * 11) - 5))
+      );
+
       candidates.push({
         id: `cand-${i + 1}`,
         name: `Candidate ${i + 1}`,
@@ -142,52 +316,57 @@ const Analysis = ({ jobId }) => {
         email: `candidate${i + 1}@example.com`,
         phone: `+1 555-${100 + i}-${1000 + i}`,
         skills: candidateSkills,
-        matchScore
+        matchScore,
       });
     }
-    
+
     // Sort by match score descending
     return candidates.sort((a, b) => b.matchScore - a.matchScore);
   };
 
   const handleAnalyze = (job) => {
     setSelectedJob(job);
+
+    // Log the selected job and its applications
+    console.log("Selected Job:", job);
+
     setMatchedCandidates(generateMatchedCandidates(job));
     setIsModalOpen(true);
   };
 
-  // Calculate realistic candidate counts based on job attributes
   const getCandidateCount = (job) => {
     if (!job) return { applied: 0 };
-    
-    // Base count on job posting date, salary, and job type
+
+    // Check for actual applications first
+    const actualApplications = getJobApplications(job._id);
+    if (actualApplications && actualApplications.length > 0) {
+      return { applied: actualApplications.length };
+    }
+
     let baseCount = 10;
-    
-    // More candidates for older jobs
-    // console.log("Job: ", job);
-    
+
     const postedDate = new Date(job.createdAt);
-    const daysSincePosted = Math.floor((new Date() - postedDate) / (1000 * 60 * 60 * 24));
+    const daysSincePosted = Math.floor(
+      (new Date() - postedDate) / (1000 * 60 * 60 * 24)
+    );
     baseCount += Math.min(20, daysSincePosted / 2);
-    
-    // Adjust for job type
+
     if (job.jobType === "Remote") baseCount *= 1.5;
-    
-    // Add some randomness
-    const applied = Math.floor(baseCount + (Math.random() * baseCount * 0.4));
-    
+
+    const applied = Math.floor(baseCount + Math.random() * baseCount * 0.4);
+
     return { applied };
   };
 
   // Get the date posted relative to today
   const getPostedDate = (job) => {
-    if (!job || (!job.createdAt)) return "Recently";
-    
+    if (!job || !job.createdAt) return "Recently";
+
     const postedDate = new Date(job.createdAt);
     const now = new Date();
     const diffTime = Math.abs(now - postedDate);
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays === 0) return "Today";
     if (diffDays === 1) return "Yesterday";
     return `${diffDays} days ago`;
@@ -196,16 +375,12 @@ const Analysis = ({ jobId }) => {
   // Route to job posting page
   const handlePostNewJob = () => {
     // You should implement proper routing here
-    window.location.href = "/post-job";
+    // window.location.href = "/post-job";
+    // <JobPost />;
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
+    if (loading) return <LoadingSpinner />;
+
 
   return (
     <div className="job-analysis-container animate-fadeIn">
@@ -306,7 +481,9 @@ const Analysis = ({ jobId }) => {
                   <td className="p-4">
                     <div className="candidate-count flex items-center text-sm text-gray-600">
                       <Users size={16} className="mr-2 text-blue-500" />
-                      <span className="font-medium">{totalCandidates} candidates</span>
+                      <span className="font-medium">
+                        {totalCandidates} candidates
+                      </span>
                     </div>
                   </td>
 
@@ -327,7 +504,9 @@ const Analysis = ({ jobId }) => {
             {filteredJobs.length === 0 && (
               <tr>
                 <td colSpan="6" className="p-12 text-center">
-                  <div className="empty-icon text-5xl text-gray-400 mb-3">📊</div>
+                  <div className="empty-icon text-5xl text-gray-400 mb-3">
+                    📊
+                  </div>
                   <h3 className="mt-4 text-lg font-medium text-gray-800">
                     No jobs found
                   </h3>
@@ -337,7 +516,7 @@ const Analysis = ({ jobId }) => {
                       : "Try adjusting your filters or post a new job to start matching candidates."}
                   </p>
                   {!jobId && (
-                    <button 
+                    <button
                       onClick={handlePostNewJob}
                       className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 mx-auto"
                     >
@@ -353,11 +532,11 @@ const Analysis = ({ jobId }) => {
       </div>
 
       {/* Ranking Modal */}
-      <RankingModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        jobTitle={selectedJob?.title || "Job"} 
-        candidates={matchedCandidates} 
+      <RankingModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        jobTitle={selectedJob?.title || "Job"}
+        candidates={matchedCandidates}
       />
     </div>
   );
