@@ -14,14 +14,13 @@ import Applications from "../components/Applications";
 import Analysis from './Analysis';
 import MyApplications from "../components/MyApplications";
 
-
 const NavButton = ({ active, icon: Icon, children, onClick, variant = "default" }) => {
   const baseClasses = "w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 cursor-pointer";
   const variants = {
     default: active
-      ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+      ? "bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
       : "text-gray-700 hover:bg-blue-50 hover:text-blue-600 hover:shadow",
-    danger: "text-red-600 hover:bg-red-50 hover:shadow"
+    danger: "text-red-600 hover:bg-red-50 hover:shadow transform hover:scale-105 transition-transform"
   };
 
   return (
@@ -76,22 +75,22 @@ const Dashboard = () => {
       case "My Applications":
         return <MyApplications />;
       case "Analysis":
-        return <Analysis  />;
+        return <Analysis />;
       default:
         return <MyProfile />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg">
+      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="animate-fadeIn">
               <h1 className="text-3xl font-bold tracking-tight flex items-center">
-                <RiDashboardLine className="mr-3 h-8 w-8" />
-                Employer Dashboard
+                <RiDashboardLine className="mr-3 h-8 w-8 text-blue-200" />
+                {user?.role === "Employer" ? "Employer Dashboard" : "Job Seeker Dashboard"}
               </h1>
               <p className="mt-2 text-blue-100 flex items-center">
                 <FaUser className="mr-2 h-4 w-4" />
@@ -128,19 +127,22 @@ const Dashboard = () => {
             <div className="h-full p-6 flex flex-col">
               <div className="mb-6 pb-4 border-b border-gray-200">
                 <div className="flex items-center justify-center mb-4">
-                  <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center shadow-lg">
-                    <span className="text-white text-xl font-bold">
+                  <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center shadow-lg border-4 border-white">
+                    <span className="text-white text-2xl font-bold">
                       {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
                     </span>
                   </div>
                 </div>
                 <h2 className="text-center text-lg font-semibold text-gray-800">
-                  {user?.role}
+                  {user?.name}
                 </h2>
+                <p className="text-center text-sm text-blue-600 font-medium mt-1 bg-blue-50 rounded-full py-1">
+                  {user?.role}
+                </p>
               </div>
               
               <div className="space-y-2 mb-auto">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 pl-4">
+                <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-2 pl-4">
                   Account
                 </p>
                 <NavButton
@@ -168,7 +170,7 @@ const Dashboard = () => {
                 {user?.role === "Employer" && (
                   <>
                     <div className="my-4 border-t border-gray-200" />
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 pl-4">
+                    <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-2 pl-4">
                       Job Management
                     </p>
                     <NavButton
@@ -205,7 +207,7 @@ const Dashboard = () => {
                 {user?.role === "Job Seeker" && (
                   <>
                     <div className="my-4 border-t border-gray-200" />
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 pl-4">
+                    <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-2 pl-4">
                       Applications
                     </p>
                     <NavButton
@@ -234,10 +236,6 @@ const Dashboard = () => {
           {/* Main Content Area */}
           <div className="flex-1">
             <div className="bg-white shadow-lg rounded-xl p-6 transition-all duration-300 hover:shadow-xl border border-gray-100">
-              <div className="mb-4 pb-4 border-b border-gray-100">
-                <h2 className="text-2xl font-bold text-gray-800">{componentName}</h2>
-                <p className="text-sm text-gray-500">Manage your {componentName.toLowerCase()} settings and information</p>
-              </div>
               <div className="max-w-4xl mx-auto">
                 {renderComponent()}
               </div>

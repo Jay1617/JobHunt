@@ -1,5 +1,5 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React from "react";
+import { useSelector } from "react-redux";
 import {
   Search,
   Bell,
@@ -15,12 +15,23 @@ import {
   GraduationCap,
   Trophy,
   Target,
-} from 'lucide-react';
+} from "lucide-react";
 
 const Home = () => {
   const { isAuthenticated, user } = useSelector((state) => state.user);
   // console.log(user);
-  
+
+  const handleButtonClick = () => {
+    if (isAuthenticated) {
+      window.location.href = "/dashboard";
+    } else {
+      if (user?.role === "Job Seeker") {
+        window.location.href = "/jobs";
+      } else if (user?.role === "Employer") {
+        window.location.href = "/dashboard";
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -31,12 +42,14 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 relative">
           <div className="text-center transform transition-transform hover:scale-105 duration-500">
             <h1 className="text-5xl md:text-7xl font-bold mb-6 drop-shadow-lg">
-              {isAuthenticated ? `Welcome Back, ${user?.name}!` : 'Find Your Dream Job Today'}
+              {isAuthenticated
+                ? `Welcome Back, ${user?.name}!`
+                : "Find Your Dream Job Today"}
             </h1>
             <p className="text-xl md:text-2xl mb-8 drop-shadow">
               {isAuthenticated
-                ? 'Continue your journey with personalized job recommendations and tools.'
-                : 'Smart job matching powered by AI to accelerate your career growth.'}
+                ? "Continue your journey with personalized job recommendations and tools."
+                : "Smart job matching powered by AI to accelerate your career growth."}
             </p>
             <div className="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-4">
               {isAuthenticated ? (
@@ -112,39 +125,47 @@ const Home = () => {
       {/* Features Section with 3D cards */}
       <div className="max-w-7xl mx-auto px-4 py-16">
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-          {isAuthenticated ? 'Your Career Tools' : 'Smart Features for Smart Job Hunting'}
+          {isAuthenticated
+            ? "Your Career Tools"
+            : "Smart Features for Smart Job Hunting"}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {[
             {
               icon: BarChart3,
               title: "AI Resume Analysis",
-              description: "Get instant resume scoring and recommendations based on job requirements using our ML-powered analysis system.",
+              description:
+                "Get instant resume scoring and recommendations based on job requirements using our ML-powered analysis system.",
             },
             {
               icon: Bell,
               title: "Instant Notifications",
-              description: "Receive real-time alerts for new job matches, application status updates, and interview invitations.",
+              description:
+                "Receive real-time alerts for new job matches, application status updates, and interview invitations.",
             },
             {
               icon: FileText,
               title: "Smart Job Matching",
-              description: "Our AI matches your skills and experience with job requirements to find the perfect opportunities.",
+              description:
+                "Our AI matches your skills and experience with job requirements to find the perfect opportunities.",
             },
             {
               icon: Zap,
               title: "One-Click Apply",
-              description: "Apply to multiple jobs instantly with your saved profile and customized resume.",
+              description:
+                "Apply to multiple jobs instantly with your saved profile and customized resume.",
             },
             {
               icon: CheckCircle,
               title: "Application Tracking",
-              description: "Track all your job applications, interviews, and follow-ups in one organized dashboard.",
+              description:
+                "Track all your job applications, interviews, and follow-ups in one organized dashboard.",
             },
             {
               icon: Search,
               title: "Advanced Search",
-              description: "Find the perfect job with powerful filters for location, salary, experience level, and more.",
+              description:
+                "Find the perfect job with powerful filters for location, salary, experience level, and more.",
             },
           ].map((feature, index) => (
             <div
@@ -172,19 +193,22 @@ const Home = () => {
                   name: "Sarah Johnson",
                   role: "Software Engineer",
                   company: "Tech Corp",
-                  story: "Found my dream job within 2 weeks of using JobHunt. The AI matching was spot-on!",
+                  story:
+                    "Found my dream job within 2 weeks of using JobHunt. The AI matching was spot-on!",
                 },
                 {
                   name: "Michael Chen",
                   role: "Marketing Manager",
                   company: "Brand Co",
-                  story: "The resume analysis feature helped me improve my profile and land interviews faster.",
+                  story:
+                    "The resume analysis feature helped me improve my profile and land interviews faster.",
                 },
                 {
                   name: "Emily Brown",
                   role: "Data Scientist",
                   company: "Data Analytics Inc",
-                  story: "JobHunt's personalized job recommendations led me to the perfect opportunity.",
+                  story:
+                    "JobHunt's personalized job recommendations led me to the perfect opportunity.",
                 },
               ].map((story, index) => (
                 <div
@@ -217,15 +241,20 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 relative">
           <div className="text-center transform transition-transform hover:scale-105 duration-500">
             <h2 className="text-3xl md:text-4xl font-bold mb-6 drop-shadow-lg">
-              {isAuthenticated ? 'Ready to Take the Next Step?' : 'Start Your Journey Today'}
+              {isAuthenticated
+                ? "Ready to Take the Next Step?"
+                : "Start Your Journey Today"}
             </h2>
             <p className="text-xl mb-8">
               {isAuthenticated
-                ? 'Explore new opportunities and tools to grow your career.'
-                : 'Join thousands of professionals who\'ve found their dream jobs through our platform.'}
+                ? "Explore new opportunities and tools to grow your career."
+                : "Join thousands of professionals who've found their dream jobs through our platform."}
             </p>
-            <button className="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-blue-50 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl cursor-pointer">
-              {isAuthenticated ? 'Explore Jobs' : 'Get Started Now'}
+            <button
+              className="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-blue-50 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl cursor-pointer"
+              onClick={handleButtonClick}
+            >
+              {isAuthenticated ? "Explore Jobs" : "Get Started Now"}
             </button>
           </div>
         </div>
