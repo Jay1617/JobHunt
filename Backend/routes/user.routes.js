@@ -28,8 +28,8 @@ router.post("/match-candidates", isAuthenticated, async (req, res) => {
   try {
     const { job, jobApplications } = req.body;
 
-    // console.log("Job:", job);
-    // console.log("Job Applications:", jobApplications);
+    console.log("Job:", job);
+    console.log("Job Applications:", jobApplications);
 
     const response = await axios.post(
       "http://127.0.0.1:5000/match-candidates", 

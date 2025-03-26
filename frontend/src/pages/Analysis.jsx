@@ -88,8 +88,8 @@ const Analysis = ({ jobId }) => {
     try {
       // Get applications for this job
       const jobApplications = getJobApplications(job._id);
-      console.log("Applications for this job:", jobApplications);
-      console.log("Selected Job:", job);
+      // console.log("Applications for this job:", jobApplications);
+      // console.log("Selected Job:", job);
 
       if (jobApplications && jobApplications.length > 0) {
         // Call the backend API endpoint for ML processing
