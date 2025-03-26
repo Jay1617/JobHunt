@@ -241,7 +241,7 @@ const UpdateProfile = () => {
               disabled={loading}
               className="w-full md:w-auto px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg
                 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 disabled:opacity-50 
-                disabled:cursor-not-allowed transition-colors duration-200"
+                disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer"
             >
               {loading ? "Saving..." : "Save Changes"}
             </button>

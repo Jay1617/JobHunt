@@ -158,8 +158,6 @@ const MyJobs = () => {
                       }`}
                     />
                   </button>
-                  <button className="tab">Applicants</button>
-                  <button className="tab">Analytics</button>
                 </div>
 
                 {/* Expanded Details Section */}

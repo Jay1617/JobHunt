@@ -6,7 +6,7 @@ import {
   postJob,
   resetJobSlice,
 } from "../store/slices/jobSlice";
-import { InfoIcon } from "lucide-react";
+import { InfoIcon, Plus, X } from "lucide-react";
 
 const InputWrapper = React.memo(({ label, optional, children }) => (
   <div className="form-group">
@@ -40,6 +40,11 @@ const JobPost = () => {
     personalWebsiteUrl: "",
   });
 
+  const [showCustomCity, setShowCustomCity] = useState(false);
+  const [customCity, setCustomCity] = useState("");
+  const [showCustomNiche, setShowCustomNiche] = useState(false);
+  const [customNiche, setCustomNiche] = useState("");
+
   const nichesArray = useMemo(
     () => [
       "Software Development",
@@ -67,6 +72,7 @@ const JobPost = () => {
       "Augmented Reality (AR) & Virtual Reality (VR)",
       "Business Intelligence & Analytics",
       "IT Governance & Compliance",
+      "Other",
     ],
     []
   );
@@ -93,6 +99,7 @@ const JobPost = () => {
       "Coimbatore",
       "Lucknow",
       "Mysore",
+      "Other",
     ],
     []
   );
@@ -101,15 +108,61 @@ const JobPost = () => {
   const { loading, error, message } = useSelector((state) => state.jobs);
   const dispatch = useDispatch();
 
+  // Check if current value is a custom value (not in our predefined arrays)
+  const isCustomCity = useMemo(
+    () => formData.location && !cities.includes(formData.location),
+    [formData.location, cities]
+  );
+
+  const isCustomNiche = useMemo(
+    () => formData.jobNiche && !nichesArray.includes(formData.jobNiche),
+    [formData.jobNiche, nichesArray]
+  );
+
   const handleInputChange = useCallback(
     (field) => (e) => {
       setFormData((prev) => ({
         ...prev,
         [field]: e.target.value,
       }));
+
+      // Handle showing custom inputs when "Other" is selected
+      if (field === "location" && e.target.value === "Other") {
+        setShowCustomCity(true);
+      } else if (field === "location") {
+        setShowCustomCity(false);
+      }
+
+      if (field === "jobNiche" && e.target.value === "Other") {
+        setShowCustomNiche(true);
+      } else if (field === "jobNiche") {
+        setShowCustomNiche(false);
+      }
     },
     []
   );
+
+  const handleCustomCitySubmit = useCallback(() => {
+    if (customCity.trim()) {
+      setFormData((prev) => ({
+        ...prev,
+        location: customCity,
+      }));
+      setShowCustomCity(false);
+      setCustomCity("");
+    }
+  }, [customCity]);
+
+  const handleCustomNicheSubmit = useCallback(() => {
+    if (customNiche.trim()) {
+      setFormData((prev) => ({
+        ...prev,
+        jobNiche: customNiche,
+      }));
+      setShowCustomNiche(false);
+      setCustomNiche("");
+    }
+  }, [customNiche]);
 
   const handleSubmit = useCallback(
     (e) => {
@@ -149,6 +202,7 @@ const JobPost = () => {
               onChange={handleInputChange("title")}
               placeholder="Enter job title"
               className="form-input"
+              required
             />
           </InputWrapper>
 
@@ -158,6 +212,7 @@ const JobPost = () => {
                 value={formData.jobType}
                 onChange={handleInputChange("jobType")}
                 className="form-select"
+                required
               >
                 <option value="">Select Job Type</option>
                 <option value="Full-time">Full-time</option>
@@ -166,18 +221,62 @@ const JobPost = () => {
             </InputWrapper>
 
             <InputWrapper label="Location">
-              <select
-                value={formData.location}
-                onChange={handleInputChange("location")}
-                className="form-select"
-              >
-                <option value="">Select City</option>
-                {cities.map((city) => (
-                  <option key={city} value={city}>
-                    {city}
-                  </option>
-                ))}
-              </select>
+              {!showCustomCity && !isCustomCity ? (
+                <select
+                  value={formData.location}
+                  onChange={handleInputChange("location")}
+                  className="form-select"
+                  required
+                >
+                  <option value="">Select City</option>
+                  {cities.map((city) => (
+                    <option key={city} value={city}>
+                      {city}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <div className="custom-input-container">
+                  <input
+                    type="text"
+                    value={isCustomCity ? formData.location : customCity}
+                    onChange={(e) =>
+                      isCustomCity
+                        ? handleInputChange("location")(e)
+                        : setCustomCity(e.target.value)
+                    }
+                    placeholder="Enter city name"
+                    className="form-input"
+                    required
+                  />
+                  <div className="custom-input-actions">
+                    {!isCustomCity && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={handleCustomCitySubmit}
+                          className="custom-input-button"
+                        >
+                          <Plus size={16} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowCustomCity(false);
+                            setFormData((prev) => ({
+                              ...prev,
+                              location: "",
+                            }));
+                          }}
+                          className="custom-input-button"
+                        >
+                          <X size={16} />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
             </InputWrapper>
           </div>
 
@@ -188,6 +287,7 @@ const JobPost = () => {
               onChange={handleInputChange("companyName")}
               placeholder="Enter company name"
               className="form-input"
+              required
             />
           </InputWrapper>
 
@@ -198,6 +298,7 @@ const JobPost = () => {
               placeholder="Describe the company and job role"
               rows={5}
               className="form-textarea"
+              required
             />
           </InputWrapper>
 
@@ -208,6 +309,7 @@ const JobPost = () => {
               placeholder="List the key responsibilities"
               rows={5}
               className="form-textarea"
+              required
             />
           </InputWrapper>
 
@@ -218,6 +320,7 @@ const JobPost = () => {
               placeholder="List required qualifications"
               rows={5}
               className="form-textarea"
+              required
             />
           </InputWrapper>
 
@@ -233,18 +336,62 @@ const JobPost = () => {
 
           <div className="form-grid">
             <InputWrapper label="Job Niche">
-              <select
-                value={formData.jobNiche}
-                onChange={handleInputChange("jobNiche")}
-                className="form-select"
-              >
-                <option value="">Select Job Niche</option>
-                {nichesArray.map((niche) => (
-                  <option key={niche} value={niche}>
-                    {niche}
-                  </option>
-                ))}
-              </select>
+              {!showCustomNiche && !isCustomNiche ? (
+                <select
+                  value={formData.jobNiche}
+                  onChange={handleInputChange("jobNiche")}
+                  className="form-select"
+                  required
+                >
+                  <option value="">Select Job Niche</option>
+                  {nichesArray.map((niche) => (
+                    <option key={niche} value={niche}>
+                      {niche}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <div className="custom-input-container">
+                  <input
+                    type="text"
+                    value={isCustomNiche ? formData.jobNiche : customNiche}
+                    onChange={(e) =>
+                      isCustomNiche
+                        ? handleInputChange("jobNiche")(e)
+                        : setCustomNiche(e.target.value)
+                    }
+                    placeholder="Enter job niche"
+                    className="form-input"
+                    required
+                  />
+                  <div className="custom-input-actions">
+                    {!isCustomNiche && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={handleCustomNicheSubmit}
+                          className="custom-input-button"
+                        >
+                          <Plus size={16} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowCustomNiche(false);
+                            setFormData((prev) => ({
+                              ...prev,
+                              jobNiche: "",
+                            }));
+                          }}
+                          className="custom-input-button"
+                        >
+                          <X size={16} />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
             </InputWrapper>
 
             <InputWrapper label="Salary Range">
@@ -254,6 +401,7 @@ const JobPost = () => {
                 onChange={handleInputChange("salary")}
                 placeholder="e.g. 50,000 - 80,000"
                 className="form-input"
+                required
               />
             </InputWrapper>
           </div>
@@ -293,7 +441,13 @@ const JobPost = () => {
           </div>
 
           <div className="button-container">
-            <button type="submit" disabled={loading} className="submit-button">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full md:w-auto px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg
+                hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 disabled:opacity-50 
+                disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer"
+            >
               {loading ? "Posting..." : "Post Job"}
             </button>
           </div>
@@ -390,6 +544,34 @@ const JobPost = () => {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 1.5rem;
+        }
+
+        .custom-input-container {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .custom-input-actions {
+          display: flex;
+          gap: 0.25rem;
+        }
+
+        .custom-input-button {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 2.5rem;
+          height: 2.5rem;
+          border-radius: 6px;
+          border: 1px solid #e2e8f0;
+          background-color: white;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .custom-input-button:hover {
+          background-color: #f7fafc;
         }
 
         @media (max-width: 768px) {
