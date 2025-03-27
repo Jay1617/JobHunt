@@ -10,11 +10,13 @@ import {
   UserCheck,
   ChevronRight,
   Loader,
+  XCircle,
 } from "lucide-react";
 import RankingModal from "../components/RankingModal";
 import JobPost from "../components/JobPost";
 import axios from "axios";
 import LoadingSpinner from "../utils/LoadingSpinner";
+import { toast } from "react-toastify";
 
 const Analysis = ({ jobId }) => {
   const dispatch = useDispatch();
@@ -84,258 +86,60 @@ const Analysis = ({ jobId }) => {
     setSelectedJob(job);
     setIsProcessing(true);
     setProcessingError(null);
+    setMatchedCandidates([]);
 
     try {
       // Get applications for this job
       const jobApplications = getJobApplications(job._id);
-      // console.log("Applications for this job:", jobApplications);
-      // console.log("Selected Job:", job);
 
-      if (jobApplications && jobApplications.length > 0) {
-        // Call the backend API endpoint for ML processing
-        const response = await axios.post(
-          "http://localhost:5500/api/v1/user/match-candidates",
-          {
-            job: job,
-            jobApplications: jobApplications,
+      if (!jobApplications || jobApplications.length === 0) {
+        throw new Error("No applications found for this job");
+      }
+
+      // Call the backend API endpoint for ML processing
+      const response = await axios.post(
+        "http://localhost:5500/api/v1/user/match-candidates",
+        {
+          job: job,
+          jobApplications: jobApplications,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
           },
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-            withCredentials: true,
-          }
-        );
-
-        console.log("ML Service Response:", response.data); 
-
-        if (response.data && response.data.candidates) {
-          setMatchedCandidates(response.data.candidates);
-        } else {
-          // Fallback to dummy data if the API response is incomplete
-          setMatchedCandidates(
-            generateDummyMatchedCandidates(job, jobApplications)
-          );
+          withCredentials: true,
         }
+      );
+
+      if (response.data && response.data.candidates) {
+        setMatchedCandidates(response.data.candidates);
+        setIsModalOpen(true);
       } else {
-        // No applications found, use dummy data
-        setMatchedCandidates(generateDummyMatchedCandidates(job));
+        throw new Error("Invalid response format from matching service");
       }
     } catch (error) {
       console.error("Error processing applications:", error);
-      setProcessingError("Failed to process applications. Please try again.");
-      // Fallback to dummy data
-      setMatchedCandidates(
-        generateDummyMatchedCandidates(job, getJobApplications(job._id))
+      setProcessingError(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to process applications. Please try again."
+      );
+      toast.error(
+        error.response?.data?.message ||
+          "Failed to match candidates. Please try again later.",
+        {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        }
       );
     } finally {
       setIsProcessing(false);
-      setIsModalOpen(true);
     }
-  };
-
-  // Extract skills from job qualifications text
-  const extractJobSkills = (job) => {
-    if (!job || !job.qualifications) return [];
-
-    const techKeywords = [
-      "JavaScript",
-      "React",
-      "Node.js",
-      "TypeScript",
-      "MongoDB",
-      "Express",
-      "HTML",
-      "CSS",
-      "Redux",
-      "GraphQL",
-      "SQL",
-      "NoSQL",
-      "Docker",
-      "AWS",
-      "Git",
-      "Python",
-      "Java",
-      "Kubernetes",
-      "Open Shift",
-      "Jira",
-      "REST",
-      "APIs",
-      "Azure",
-      "GCP",
-      "Agile",
-      "Cloud",
-    ];
-
-    const qualificationsLower = job.qualifications.toLowerCase();
-
-    return techKeywords.filter((skill) =>
-      qualificationsLower.includes(skill.toLowerCase())
-    );
-  };
-
-  // Generate dummy matched candidates for fallback
-  const generateDummyMatchedCandidates = (job, realApplications = []) => {
-    if (!job) return [];
-
-    const jobSkills = extractJobSkills(job);
-
-    // If we have real applications, use them with dummy match scores
-    if (realApplications && realApplications.length > 0) {
-      return realApplications
-        .map((app, index) => {
-          // Generate random skills for each candidate
-          const candidateSkills = generateRandomSkills(jobSkills);
-
-          // Calculate match score based on skills
-          const matchScore = 75 + Math.floor(Math.random() * 20);
-
-          return {
-            id: app._id || `app-${index}`,
-            name: app.jobSeekerInfo?.name || `Candidate ${index + 1}`,
-            title: app.jobSeekerInfo?.title || "Job Applicant",
-            email:
-              app.jobSeekerInfo?.email || `candidate${index + 1}@example.com`,
-            phone: app.jobSeekerInfo?.phone || `Unknown`,
-            skills: candidateSkills,
-            matchScore,
-            resumeUrl: app.jobSeekerInfo?.resume?.url || "",
-            coverLetter: app.jobSeekerInfo?.coverLetter || "",
-          };
-        })
-        .sort((a, b) => b.matchScore - a.matchScore);
-    }
-
-    // Otherwise, generate completely dummy candidates
-    const allTechSkills = [
-      "JavaScript",
-      "React",
-      "Node.js",
-      "TypeScript",
-      "MongoDB",
-      "Express",
-      "HTML/CSS",
-      "Redux",
-      "GraphQL",
-      "SQL",
-      "NoSQL",
-      "Docker",
-      "AWS",
-      "Git",
-      "Python",
-      "Java",
-      "Kubernetes",
-      "Open Shift",
-      "Jira",
-      "REST APIs",
-      "Azure",
-      "GCP",
-      "Agile",
-      "Cloud Computing",
-    ];
-
-    const candidates = [];
-    const numCandidates = Math.floor(Math.random() * 6) + 5; // 5-10 candidates
-
-    const jobTitles = [
-      "Software Developer",
-      "Frontend Engineer",
-      "Full Stack Developer",
-      "Backend Developer",
-      "DevOps Engineer",
-      "Java Developer",
-      "Python Developer",
-      "UI Developer",
-    ];
-
-    for (let i = 0; i < numCandidates; i++) {
-      // Generate skills and match score
-      const candidateSkills = [];
-      const numSkills = Math.floor(Math.random() * 4) + 3; // 3-6 skills
-
-      // Add some job-matching skills
-      jobSkills.forEach((skill) => {
-        if (Math.random() < 0.7 && !candidateSkills.includes(skill)) {
-          candidateSkills.push(skill);
-        }
-      });
-
-      // Fill remaining skills with random ones
-      while (candidateSkills.length < numSkills) {
-        const randomSkill =
-          allTechSkills[Math.floor(Math.random() * allTechSkills.length)];
-        if (!candidateSkills.includes(randomSkill)) {
-          candidateSkills.push(randomSkill);
-        }
-      }
-
-      // Calculate match score
-      const matchScore = 75 + Math.floor(Math.random() * 20);
-
-      candidates.push({
-        id: `cand-${i + 1}`,
-        name: `Candidate ${i + 1}`,
-        title: jobTitles[Math.floor(Math.random() * jobTitles.length)],
-        email: `candidate${i + 1}@example.com`,
-        phone: `+1 555-${100 + i}-${1000 + i}`,
-        skills: candidateSkills,
-        matchScore,
-      });
-    }
-
-    // Sort by match score descending
-    return candidates.sort((a, b) => b.matchScore - a.matchScore);
-  };
-
-  // Helper function to generate random skills that favor matching job skills
-  const generateRandomSkills = (jobSkills) => {
-    const allTechSkills = [
-      "JavaScript",
-      "React",
-      "Node.js",
-      "TypeScript",
-      "MongoDB",
-      "Express",
-      "HTML/CSS",
-      "Redux",
-      "GraphQL",
-      "SQL",
-      "NoSQL",
-      "Docker",
-      "AWS",
-      "Git",
-      "Python",
-      "Java",
-      "Kubernetes",
-      "Open Shift",
-      "Jira",
-      "REST APIs",
-      "Azure",
-      "GCP",
-      "Agile",
-      "Cloud Computing",
-    ];
-
-    const candidateSkills = [];
-    const numSkills = Math.floor(Math.random() * 4) + 3; // 3-6 skills
-
-    // Add some job-matching skills (70% chance for each job skill)
-    jobSkills.forEach((skill) => {
-      if (Math.random() < 0.7 && !candidateSkills.includes(skill)) {
-        candidateSkills.push(skill);
-      }
-    });
-
-    // Fill remaining skills with random ones
-    while (candidateSkills.length < numSkills) {
-      const randomSkill =
-        allTechSkills[Math.floor(Math.random() * allTechSkills.length)];
-      if (!candidateSkills.includes(randomSkill)) {
-        candidateSkills.push(randomSkill);
-      }
-    }
-
-    return candidateSkills;
   };
 
   const getCandidateCount = (job) => {
@@ -347,19 +151,7 @@ const Analysis = ({ jobId }) => {
       return { applied: actualApplications.length };
     }
 
-    let baseCount = 10;
-
-    const postedDate = new Date(job.createdAt);
-    const daysSincePosted = Math.floor(
-      (new Date() - postedDate) / (1000 * 60 * 60 * 24)
-    );
-    baseCount += Math.min(20, daysSincePosted / 2);
-
-    if (job.jobType === "Remote") baseCount *= 1.5;
-
-    const applied = Math.floor(baseCount + Math.random() * baseCount * 0.4);
-
-    return { applied };
+    return { applied: 0 };
   };
 
   // Get the date posted relative to today
@@ -378,15 +170,23 @@ const Analysis = ({ jobId }) => {
 
   // Route to job posting page
   const handlePostNewJob = () => {
-    // You should implement proper routing here
-    // window.location.href = "/post-job";
-    // <JobPost />;
+    // Implement proper routing here
   };
 
   if (loading) return <LoadingSpinner />;
 
   return (
     <div className="job-analysis-container animate-fadeIn">
+      {/* Error Toast Container */}
+      {processingError && (
+        <div className="fixed top-4 right-4 z-50">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative flex items-center">
+            <XCircle className="mr-2" />
+            <span>{processingError}</span>
+          </div>
+        </div>
+      )}
+
       <div className="header">
         <h2 className="text-2xl font-bold text-gray-800 flex items-center">
           <BarChart2 className="mr-2 h-6 w-6 text-blue-600" />
@@ -492,12 +292,21 @@ const Analysis = ({ jobId }) => {
 
                   <td className="p-4">
                     <button
-                      className="analyze-button flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-colors shadow-sm hover:shadow font-medium cursor-pointer"
+                      className="analyze-button flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-colors shadow-sm hover:shadow font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       onClick={() => handleAnalyze(job)}
-                      disabled={totalCandidates === 0}
+                      disabled={totalCandidates === 0 || isProcessing}
                     >
-                      <UserCheck size={16} />
-                      <span>Match</span>
+                      {isProcessing && selectedJob?._id === job._id ? (
+                        <>
+                          <Loader className="animate-spin" size={16} />
+                          <span>Processing...</span>
+                        </>
+                      ) : (
+                        <>
+                          <UserCheck size={16} />
+                          <span>Match</span>
+                        </>
+                      )}
                     </button>
                   </td>
                 </tr>
@@ -540,6 +349,7 @@ const Analysis = ({ jobId }) => {
         onClose={() => setIsModalOpen(false)}
         jobTitle={selectedJob?.title || "Job"}
         candidates={matchedCandidates}
+        isLoading={isProcessing}
       />
     </div>
   );

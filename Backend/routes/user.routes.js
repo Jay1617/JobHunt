@@ -44,7 +44,7 @@ router.post("/match-candidates", isAuthenticated, async (req, res) => {
       }
     );
 
-    // console.log("ML Service Response:", response.data);
+    console.log("ML Service Response:", response.data);
 
     return res.status(200).json(response.data);
   } catch (error) {
